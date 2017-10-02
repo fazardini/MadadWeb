@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 class Hospital(models.Model):
     safe_id = models.CharField(max_length=16, null=False, unique=True)
     name = models.CharField(max_length=100, null=False)
+    mobile = models.CharField(max_length=11, null=False)
+    phone = models.CharField(max_length=30, blank=True, default='')
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -19,6 +21,8 @@ class Hospital(models.Model):
 class Drug(models.Model):
     safe_id = models.CharField(max_length=16, null=False, unique=True)
     name = models.CharField(max_length=100, null=False)
+    def __str__(self):
+        return "%s" % self.name
 
 
 class SurplusDrug(models.Model):

@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse
-from madadcore.models import Hospital
+from madadcore.models import Hospital, Drug, SurplusDrug
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from secrets import token_hex
+from datetime import date
+import calendar
 
 
 def register(request):
@@ -21,7 +23,7 @@ def register(request):
             return JsonResponse({'error': True})
         else:
             try:
-                user = User(username=username, first_name=first_name, last_name=last_name)
+                user = User(username=username, first_name=first_name, last_name=last_name, is_active=False)
                 user.set_password(password)
                 user.save()
                 safe_id = token_hex(8)
@@ -39,14 +41,15 @@ def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(username=username, password=password)
+        user = User.objects.filter(username=username).first()
         if user:
             if user.is_active:
-                login(request, user)
-                html = "<html><body>It is now.</body></html>"
-                return HttpResponse(html)
-                # return HttpResponseRedirect(reverse('home'))
-                # # return JsonResponse({'done': True})
+                user = authenticate(username=username, password=password)
+                if user:
+                    login(request, user)
+                    return HttpResponseRedirect(reverse('hospital_drugs', kwargs={'safe_id':user.hospital.safe_id}))
+                else:
+                    return render(request, 'madadsite/login.html', {'error': True})
             else:
                 return render(request, 'madadsite/login.html', {'active_error': True})
         else:
@@ -58,3 +61,37 @@ def user_logout(request):
 
     logout(request)
     return HttpResponseRedirect(reverse('login'))
+
+
+def hospital_drugs(request, safe_id):
+    user = request.user
+    hospital = Hospital.objects.filter(safe_id=safe_id).first()
+    access = (hospital.user == user)
+    if request.method == 'POST':
+        if access:
+            try:
+                name = request.POST.get('drug_name')
+                count = request.POST.get('drug_count')
+                month = int(request.POST.get('drug_month'))
+                year = int(request.POST.get('drug_year'))
+                last_day_this_month = calendar.monthrange(year, month)[1]
+                drug_date = date(year, month, last_day_this_month)
+                safe_id = token_hex(8)
+                drug = Drug.objects.create(name=name, safe_id=safe_id)
+                safe_id = token_hex(8)
+                SurplusDrug.objects.create(safe_id=safe_id, count=count, expiration_date=drug_date,
+                                           drug=drug, hospital=hospital)
+                done = True
+            except:
+                done = False
+            response_dict = {'access': True, 'done': done}
+        else:
+            response_dict = {'access':False}
+        return JsonResponse(response_dict)
+    if access:
+        surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('drug__name', 'expiration_date',
+                                                                            'count')
+        context_dict = {'access': access, 'hospital_id': safe_id, 'surplus_drugs': list(surplus_drugs)}
+        return render(request, 'madadsite/drugs.html', context_dict)
+    else:
+        return render(request, 'madadsite/drugs.html', {'access':access})

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse
-from madadcore.models import Hospital, Drug, SurplusDrug
+from madadcore.models import Hospital, Drug, SurplusDrug, OrderedDrug
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from secrets import token_hex
@@ -94,4 +94,16 @@ def hospital_drugs(request, safe_id):
         context_dict = {'access': access, 'hospital_id': safe_id, 'surplus_drugs': list(surplus_drugs)}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
-        return render(request, 'madadsite/drugs.html', {'access':access})
+        return render(request, 'madadsite/drugs.html', {'access': access})
+
+
+def all_hospitals(request):
+    hospitals = Hospital.objects.all().values('name', 'safe_id')
+    context_dict = {'hospitals': list(hospitals)}
+    return render(request, 'madadsite/hospitals.html', context_dict)
+
+
+def all_drugs(request):
+    all_drugs = Drug.objects.all().values('name', 'safe_id')
+    context_dict = {'drugs': list(all_drugs)}
+    return render(request, 'madadsite/all_drugs.html', context_dict)

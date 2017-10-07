@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'madadsite/css/register.css' %}" rel="stylesheet"/>
+    <title>داروها</title>
+    <!-- <link rel="icon" href="{% static 'panel/images/favicon.ico' %}" type="image/x-icon" /> -->
+    <script src="{% static 'madadsite/js/jquery.min.js' %}"></script>
+  </head>
+  <body>
+  
+    <h1>دارو ها</h1>
+
+    <div class="all_drugs" id="all_drugs">
+      {% for item in drugs %}
+      <div class="item" id="hospital_{{item.safe_id}}">
+        <div>نام دارو: {{item.name}}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <script type="text/javascript">
+    </script>
+  </body>
+</html>

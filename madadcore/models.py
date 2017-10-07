@@ -8,6 +8,7 @@ class Hospital(models.Model):
     name = models.CharField(max_length=100, null=False)
     mobile = models.CharField(max_length=11, null=False)
     phone = models.CharField(max_length=30, blank=True, default='')
+    address = models.TextField(max_length=256, blank=True, default='')
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,

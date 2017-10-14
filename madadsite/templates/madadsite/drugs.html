@@ -1,26 +1,44 @@
+{% extends "madadsite/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>داروهای شما</title>
-    <!-- <link rel="icon" href="{% static 'panel/images/favicon.ico' %}" type="image/x-icon" /> -->
-    <link href="{% static 'madadsite/css/register.css' %}" rel="stylesheet"/>
-    <script src="{% static 'madadsite/js/jquery.min.js' %}"></script>
-<!--         <link href="{% static 'panel/content/Animate.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/FontAwesome.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/Remodal.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/QuestionsBank/Theme/Core.css' %}" rel="stylesheet" type="text/css" />
-    <link href="{% static 'panel/content/PersianDatepicker.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/Select2.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/QuestionsBank/QuestionsList/Core.css' %}" rel="stylesheet"/>
-    <script src="{% static 'panel/scripts/jquery.min.js' %}"></script>
-    <script src="{% static 'panel/scripts/Autocomplete.js' %}"></script> -->
-  </head>
-  <body>
-  
-    <h1>داروهای شما</h1>
+
+{% block title %}داروهای مازاد من{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}{% csrf_token %}
+  <div class="container-fluid">
+    <div class="row my-drugs">
+      <div class="col-lg-4 col-md-4 col-sm-4 right-part">
+        <h3>افزودن داروی جدید</h3>
+        <div class="row">
+          <label class="col-lg-6 col-md-6 col-sm-6 col-xs-6">نام دارو</label>
+          <input class="col-lg-6 col-md-6 col-sm-6 col-xs-6" type="text" placeholder="نام دارو" id="drug_name" required>
+        </div>
+        <div class="row">
+          <label for="drug_count"><b>تعداد دارو</b></label>
+          <input type="text" placeholder="تعداد دارو" id="drug_count" required>
+        </div>
+        <div class="row">
+          <label><b>ماه انقضا</b></label>
+          <input type="text" placeholder="ماه انقضا" id="drug_month" required>
+        </div>
+        <div class="row">
+          <label><b>سال انقضا</b></label>
+          <input type="text" placeholder="سال انقضا" id="drug_year" required>
+        </div>
+          <div class="clearfix">
+            <button type="submit" class="signupbtn" id="add_drug">افزودن دارو</button>
+          </div>
+          <input type="text" id="hospital_id" style="display: none;" value="{{ hospital_id }}">
+        <!-- </div> -->
+      </div>
+      <div class="col-lg-8 col-md-8 col-sm-8 left-part">dsa<br>dasdasd
+      </div>
+    </div>
+  </div>
+
+  <h1>داروهای شما</h1>
     <form>
     {% csrf_token %}
       <div class="container">
@@ -104,5 +122,6 @@
         });
       });
     </script>
+    {% endblock %}  
   </body>
 </html>

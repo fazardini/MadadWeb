@@ -1,3 +1,4 @@
+{% extends "madadsite/base.html" %}
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -10,17 +11,18 @@
     <script src="{% static 'madadsite/js/jquery.min.js' %}"></script>
   </head>
   <body>
-  
+  {% block content %}
     <h1>بیمارستان ها</h1>
 
     <div class="all_drugs" id="all_drugs">
       {% for item in hospitals %}
       <div class="item" id="hospital_{{item.safe_id}}">
         <div>نام بیمارستان: {{item.name}}</div>
+        <div>آدرس بیمارستان: {{item.address}}</div>
+        <div>شماره تلفن بیمارستان: {{item.phone}}</div>
       </div>
       {% endfor %}
     </div>
-    <script type="text/javascript">
-    </script>
+{% endblock %}
   </body>
 </html>

@@ -47,7 +47,7 @@ def user_login(request):
                 user = authenticate(username=username, password=password)
                 if user:
                     login(request, user)
-                    return HttpResponseRedirect(reverse('hospital_drugs', kwargs={'safe_id':user.hospital.safe_id}))
+                    return HttpResponseRedirect(reverse('hospital_drugs', kwargs={'safe_id': user.hospital.safe_id}))
                 else:
                     return render(request, 'madadsite/login.html', {'error': True})
             else:
@@ -91,19 +91,19 @@ def hospital_drugs(request, safe_id):
     if access:
         surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('drug__name', 'expiration_date',
                                                                             'count')
-        context_dict = {'access': access, 'hospital_id': safe_id, 'surplus_drugs': list(surplus_drugs)}
+        context_dict = {'access': access, 'hospital_id': safe_id, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
         return render(request, 'madadsite/drugs.html', {'access': access})
 
 
 def all_hospitals(request):
-    hospitals = Hospital.objects.all().values('name', 'safe_id')
-    context_dict = {'hospitals': list(hospitals)}
+    hospitals = Hospital.objects.all().values('name', 'safe_id', 'address', 'phone')
+    context_dict = {'hospitals': list(hospitals), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/hospitals.html', context_dict)
 
 
 def all_drugs(request):
-    all_drugs = Drug.objects.all().values('name', 'safe_id')
-    context_dict = {'drugs': list(all_drugs)}
+    all_drugs = SurplusDrug.objects.all().values('drug__name', 'drug__safe_id')
+    context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/all_drugs.html', context_dict)

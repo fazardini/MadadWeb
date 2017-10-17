@@ -1,18 +1,36 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'madadsite/css/register.css' %}" rel="stylesheet"/>
-    <title>داروهای شما</title>
-    <!-- <link rel="icon" href="{% static 'panel/images/favicon.ico' %}" type="image/x-icon" /> -->
-    <script src="{% static 'madadsite/js/jquery.min.js' %}"></script>
-  </head>
-  <body>
-  {% block content %}
-    <h1>بیمارستان ها</h1>
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row my-drugs">
+      <div class="col-lg-4 col-md-4 col-sm-4 right-part">
+        <h3>جستجوی بیماستان</h3>
+        <div class="row top-10">
+          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام</label>
+          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="" id="drug_year" required>
+          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+        </div>
+        <button type="submit" id="hospital_search">جستجو</button>
+        <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
+      </div>
+      <div class="col-lg-8 col-md-8 col-sm-8 left-part">
+        <h1>بیمارستان ها</h1>
+        <div id="all_hospitals">
+          {% for item in hospitals %}
+            <div class="col-lg-6 col-md-6 col-sm-6 text-center">
+              <div class="box">
+                <div class="box-title">{{item.name}}</div>
+                <div class="box-content">آدرس بیمارستان: {{item.address}}</div>
+                <div class="box-content">شماره تلفن بیمارستان: {{item.phone}}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+<!--     <h1>بیمارستان ها</h1>
 
     <div class="all_drugs" id="all_drugs">
       {% for item in hospitals %}
@@ -22,7 +40,7 @@
         <div>شماره تلفن بیمارستان: {{item.phone}}</div>
       </div>
       {% endfor %}
-    </div>
+    </div> -->
 {% endblock %}
   </body>
 </html>

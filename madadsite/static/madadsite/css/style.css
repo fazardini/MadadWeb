@@ -24,11 +24,33 @@ header{
     width: 100%;
 }
 div.right-part{
-    background-color: red;
+    background-color: #ccc;
 }
 div.right-part h3{
     margin: 10px;
 }
+div.right-part div.top-10{
+    margin-top: 10px;
+}
 div.left-part{
-    background-color: blue;
+    /*background-color: blue;*/
+}
+div.left-part h1{
+    margin-top: 0;
+}
+.d-none{
+    display: none;
+}
+div.box{
+    border-radius: 5px;
+    border:1px solid;
+    /*background: green;*/
+    margin-top: 10px;
+    overflow: hidden;
+}
+div.box div.box-title{
+    color: #fff;
+    background: #000;
+    width: 100%;
+    padding: 5px;
 }

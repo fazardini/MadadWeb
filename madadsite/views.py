@@ -72,13 +72,17 @@ def hospital_drugs(request, safe_id):
         if access:
             try:
                 name = request.POST.get('drug_name')
+                safe_id = request.POST.get('drug_id')
                 count = request.POST.get('drug_count')
                 month = int(request.POST.get('drug_month'))
                 year = int(request.POST.get('drug_year'))
                 last_day_this_month = calendar.monthrange(year, month)[1]
                 drug_date = date(year, month, last_day_this_month)
-                safe_id = token_hex(8)
-                drug = Drug.objects.create(name=name, safe_id=safe_id)
+                if safe_id:
+                    drug = Drug.objects.filter(safe_id=safe_id).first()
+                else:
+                    safe_id = token_hex(8)
+                    drug = Drug.objects.create(name=name, safe_id=safe_id)
                 safe_id = token_hex(8)
                 SurplusDrug.objects.create(safe_id=safe_id, count=count, expiration_date=drug_date,
                                            drug=drug, hospital=hospital)

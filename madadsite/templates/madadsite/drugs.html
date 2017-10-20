@@ -13,7 +13,8 @@
         <h3>افزودن داروی جدید</h3>
         <div class="row top-10">
           <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" required>
+          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-shop="" required>
+          <span class="glyphicon glyphicon-remove d-none" id="remove_drug"></span>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
         <div class="row top-10">
@@ -52,6 +53,32 @@
   </div>
     <script type="text/javascript">
       $(document).ready(function(){
+        $(function() {
+            $("#drug_name").autocomplete({
+                source: '/drugs-name/',
+                select: function (event, ui) { //item selected
+                    AutoCompleteSelectHandlerShop(event, ui)
+                },
+                minLength: 2,
+            });
+        });
+
+        function AutoCompleteSelectHandlerShop(event, ui)
+        {
+            var selectedObj = ui.item;
+            $("#remove_drug").show();
+            if(selectedObj.id)
+                $("#drug_name").attr("data-drug", selectedObj.id);
+            else
+                $("#drug_name").attr("data-drug", "");
+            var selectedObj = ui.item;
+        }
+        $("#remove_drug").click(function(){
+            $("#drug_name").val('');
+            $("#drug_name").attr("data-shop", "");
+            $("#remove_drug").hide();
+        });
+
         function isNumberKey(evt){
           var charCode = (evt.which) ? evt.which : event.keyCode;
           if (charCode > 31 && (charCode < 48 || charCode > 57))

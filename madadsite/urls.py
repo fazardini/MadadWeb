@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^drugs/(?P<safe_id>[0-9a-f]{16})/$', hospital_drugs,  name='hospital_drugs'),
     url(r'^hospitals/$', all_hospitals,  name='all_hospitals'),
     url(r'^drugs/all/$', all_drugs,  name='all_drugs'),
+    url(r'^drugs-name/', drugs_name, name='drugs_name'),
 ]

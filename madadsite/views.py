@@ -7,6 +7,7 @@ from django.contrib.auth import login, logout, authenticate
 from secrets import token_hex
 from datetime import date
 import calendar
+import json
 
 
 def register(request):
@@ -107,3 +108,20 @@ def all_drugs(request):
     all_drugs = SurplusDrug.objects.all().values('drug__name', 'drug__safe_id')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/all_drugs.html', context_dict)
+
+
+def drugs_name(request):
+    if request.is_ajax():
+        searched_text = request.GET.get('term', '')
+        drugs = Drug.objects.filter(name__icontains=searched_text).values(
+            'name', 'safe_id').order_by('name')[:10]
+        results = []
+        for drug in drugs:
+            drugs_json = {'label': drug['name'], 'value': drug['name'],
+                          'id': drug['safe_id']}
+            results.append(drugs_json)
+        data = json.dumps(results)
+    else:
+        data = 'fail'
+    mimetype = 'application/json'
+    return HttpResponse(data, mimetype)

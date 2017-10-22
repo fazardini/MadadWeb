@@ -31,7 +31,7 @@ def register(request):
                 Hospital.objects.create(safe_id=safe_id, name=hospital_name,
                                         mobile=mobile, phone=phone, user=user)
                 done = True
-            except:
+            except Exception as e:
                 done = False
             return JsonResponse({'done': done})
     else:
@@ -64,7 +64,7 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('login'))
 
 
-def hospital_drugs(request, safe_id):
+def my_drugs(request, safe_id):
     user = request.user
     hospital = Hospital.objects.filter(safe_id=safe_id).first()
     access = (hospital.user == user)
@@ -87,11 +87,12 @@ def hospital_drugs(request, safe_id):
                 SurplusDrug.objects.create(safe_id=safe_id, count=count, expiration_date=drug_date,
                                            drug=drug, hospital=hospital)
                 done = True
-            except:
+            except Exception as e:
+                err = e
                 done = False
             response_dict = {'access': True, 'done': done}
         else:
-            response_dict = {'access':False}
+            response_dict = {'access': False}
         return JsonResponse(response_dict)
     if access:
         surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('drug__name', 'expiration_date',
@@ -102,7 +103,28 @@ def hospital_drugs(request, safe_id):
         return render(request, 'madadsite/drugs.html', {'access': access})
 
 
+def ordered_drugs(request, safe_id):
+    ordered_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id).values(
+        'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+        'surplus_drug__hospital__name', 'safe_id')
+    context_dict = {'drugs': list(ordered_drugs), 'safe_id': request.user.hospital.safe_id}
+    return render(request, 'madadsite/drugs_ordered.html', context_dict)
+
+
+def order_token_drugs(request, safe_id):
+    all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id).values(
+        'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+        'client_hospital__name', 'safe_id')
+    context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
+    return render(request, 'madadsite/drugs_ordertaken.html', context_dict)
+
+
 def all_hospitals(request):
+    if request.method == 'POST':
+        search_text = request.POST.get('search_text')
+        hospitals = Hospital.objects.filter(name__icontains=search_text).all().values('name', 'safe_id', 'address', 'phone')
+        response_dict = {'hospitals': list(hospitals)}
+        return JsonResponse(response_dict)
     hospitals = Hospital.objects.all().values('name', 'safe_id', 'address', 'phone')
     context_dict = {'hospitals': list(hospitals), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/hospitals.html', context_dict)
@@ -129,3 +151,15 @@ def drugs_name(request):
         data = 'fail'
     mimetype = 'application/json'
     return HttpResponse(data, mimetype)
+
+
+def change_order_state(request):
+    return 1
+
+
+def hospitals_drug(request):
+    return 1
+
+
+def save_order(request):
+    return 1

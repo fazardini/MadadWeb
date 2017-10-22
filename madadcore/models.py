@@ -22,6 +22,7 @@ class Hospital(models.Model):
 class Drug(models.Model):
     safe_id = models.CharField(max_length=16, null=False, unique=True)
     name = models.CharField(max_length=100, null=False)
+
     def __str__(self):
         return "%s" % self.name
 
@@ -51,6 +52,17 @@ class SurplusDrug(models.Model):
 
 
 class OrderedDrug(models.Model):
+    PENDING = 0
+    SENT = 1
+    DELIVERED = 2
+    MODE_CHOICES = (
+        (PENDING, 'درحال بررسی'),
+        (SENT, 'ارسال شده'),
+        (DELIVERED, 'دریافت شده'),
+    )
+    MODE_DICT = dict((k, v) for k, v in MODE_CHOICES)
+
+    state = models.SmallIntegerField(default=0, choices=MODE_CHOICES)
     safe_id = models.CharField(max_length=16, null=False, unique=True)
     ordered_count = models.IntegerField()
     client_hospital = models.ForeignKey(

@@ -1,7 +1,7 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
 
-{% block content %}
+{% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
       <div class="col-lg-4 col-md-4 col-sm-4 right-part">
@@ -30,17 +30,30 @@
       </div>
     </div>
   </div>
-<!--     <h1>بیمارستان ها</h1>
-
-    <div class="all_drugs" id="all_drugs">
-      {% for item in hospitals %}
-      <div class="item" id="hospital_{{item.safe_id}}">
-        <div>نام بیمارستان: {{item.name}}</div>
-        <div>آدرس بیمارستان: {{item.address}}</div>
-        <div>شماره تلفن بیمارستان: {{item.phone}}</div>
-      </div>
-      {% endfor %}
-    </div> -->
+  <script type="text/javascript">
+    $(document).ready(function(){
+        $("#hospital_search").click(function(e){
+          e.defaultPrevented;
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          var searchText = $("#search_text").val();
+          $.ajax({
+              url : "/hospitals/", 
+              type : "POST",
+              dataType: "json", 
+              data : {
+                search_text : searchText,
+                csrfmiddlewaretoken: csrftoken,
+              },
+              success : function(json) {
+                if (json.done) {
+                }
+              },
+              error : function(xhr,errmsg,err) {
+                  alert("جستجو با مشکل مواجه شد.");
+              }
+          });
+          return false;
+        });
+      });
+  </script>
 {% endblock %}
-  </body>
-</html>

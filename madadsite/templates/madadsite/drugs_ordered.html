@@ -1,7 +1,7 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
 
-{% block title %}همه داروهای مازاد{% endblock %}
+{% block title %}داروهای مازاد من{% endblock %}
 
 {% block header %}
 {% endblock %}
@@ -10,7 +10,7 @@
   <div class="container-fluid">
     <div class="row my-drugs">
       <div class="col-lg-4 col-md-4 col-sm-4 right-part">
-        <h3>فیلترها</h3>
+        <h3>افزودن داروی جدید</h3>
         <div class="row top-10">
           <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
           <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-shop="" required>
@@ -18,27 +18,33 @@
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
         <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام بیمارستان</label>
+          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">تعداد</label>
           <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="تعداد دارو" id="drug_count" required>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
         <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">مرتب سازی</label>
+          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">ماه انقضا</label>
           <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="ماه" id="drug_month" required>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
-        <button type="submit" id="add_drug">جستجو</button>
+        <div class="row top-10">
+          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">سال انقضا</label>
+          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="سال" id="drug_year" required>
+          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+        </div>
+        <button type="submit" id="add_drug">افزودن دارو</button>
         <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
       </div>
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
-        <h1>همه داروهای مازاد</h1>
+        <h1>داروهای شما</h1>
         <div id="all_drugs">
           {% for item in drugs %}
             <div class="col-lg-6 col-md-6 col-sm-6 text-center">
               <div class="box">
-                <div class="box-title">{{item.drug__name}}</div>
-                <div class="box-content"> تعداد: {{item.count}}</div>
-                <div class="box-content"> انقضا: {{item.expiration_date.year}}/{{item.expiration_date.month}}</div>
+                <div class="box-title">{{item.surplus_drug__drug__name}}</div>
+                <div class="box-content"> تعداد سفارش: {{item.ordered_count}}</div>
+                <div class="box-content"> بیمارستان: {{item.surplus_drug__hospital__name}}</div>
+                <div class="box-content"> انقضا: {{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</div>
               </div>
             </div>
           {% endfor %}

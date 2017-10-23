@@ -35,7 +35,7 @@
         <div id="all_drugs">
           {% for item in drugs %}
             <div class="col-lg-6 col-md-6 col-sm-6 text-center">
-              <div class="box">
+              <div class="box drug-hospital" id="drug_{{item.drug__safe_id}}">
                 <div class="box-title">{{item.drug__name}}</div>
                 <div class="box-content"> تعداد: {{item.count}}</div>
                 <div class="box-content"> انقضا: {{item.expiration_date.year}}/{{item.expiration_date.month}}</div>
@@ -44,6 +44,24 @@
           {% endfor %}
         </div>
       </div>
+<!-- Modal -->
+<button type="button" class="btn btn-info btn-lg d-none" id="show_modal" data-toggle="modal" data-target="#myModal"></button>
+  <div class="modal" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">لیست بیمارستان ها</h4>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
     </div>
   </div>
     <script type="text/javascript">
@@ -89,42 +107,32 @@
         $("#drug_year").keypress(function(evt){
           return isNumberKey(evt);
         });
-        $("#add_drug").click(function(e){
+        $(".drug-hospital").click(function(e){
           e.defaultPrevented;
+          var str = this.id;
+          var drugId = str.split("_")[1];
           var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-          var drugName = $("#drug_name").val();
-          var drugId = $("#drug_name").attr("data-shop");
-          var drugCount = $("#drug_count").val();
-          var hospitalId = $("#hospital_id").val();
-          var drugMonth = $("#drug_month").val();
-          var drugYear = $("#drug_year").val();
           $.ajax({
-              url : "/drugs/"+hospitalId+"/", 
+              url : "/hospitals-drug/", 
               type : "POST",
               dataType: "json", 
               data : {
-                drug_name : drugName,
                 drug_id : drugId,
-                drug_count : drugCount,
-                drug_month: drugMonth,
-                drug_year: drugYear,
                 csrfmiddlewaretoken: csrftoken,
               },
               success : function(json) {
-                  // alert(json.done);
-                if (json.done) {
-                  $("#all_drugs").prepend('<div class="col-lg-6 col-md-6 col-sm-6 text-center"><div class="box"><div class="box-title">'+drugName+'</div><div class="box-content"> تعداد: '+drugCount+'</div><div class="box-content"> انقضا: '+drugYear+'/'+drugMonth+'</div></div></div>');
-                  alert("دارو با موفقیت ثبت شد!");
+
+                if (json.hospitals) {
+                  $("#show_modal").trigger( "click" ); 
+                  $(".modal-body").html('');
+                  for (i in json.hospitals) {
+                    $(".modal-body").append('<p>'+json.hospitals[i]['hospital__name']+'</p>');
+                  }
                 }
-                else{
-                  alert("ثبت دارو با شکست مواجه شد");
-                }
-                if(!json.access){
-                  alert("دسترسی غیرمجاز!");
-                }
+
               },
               error : function(xhr,errmsg,err) {
-                  alert("ثبت بیمارستان با مشکل مواجه شد.");
+                  alert("عملیات با مشکل مواجه شد.");
               }
           });
           return false;

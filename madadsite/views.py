@@ -48,7 +48,7 @@ def user_login(request):
                 user = authenticate(username=username, password=password)
                 if user:
                     login(request, user)
-                    return HttpResponseRedirect(reverse('hospital_drugs', kwargs={'safe_id': user.hospital.safe_id}))
+                    return HttpResponseRedirect(reverse('my_drugs', kwargs={'safe_id': user.hospital.safe_id}))
                 else:
                     return render(request, 'madadsite/login.html', {'error': True})
             else:
@@ -139,7 +139,7 @@ def all_drugs(request):
 def drugs_name(request):
     if request.is_ajax():
         searched_text = request.GET.get('term', '')
-        drugs = Drug.objects.filter(name__icontains=searched_text).values(
+        drugs = Drug.objects.filter(name__icontains=searched_text).distinct().values(
             'name', 'safe_id').order_by('name')[:10]
         results = []
         for drug in drugs:
@@ -158,7 +158,11 @@ def change_order_state(request):
 
 
 def hospitals_drug(request):
-    return 1
+    drug_id = request.POST.get('drug_id')
+    hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).values(
+        'hospital__name', 'expiration_date', 'count')
+
+    return JsonResponse({'hospitals': list(hospitals)})
 
 
 def save_order(request):

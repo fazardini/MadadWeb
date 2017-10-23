@@ -13,7 +13,7 @@
         <h3>افزودن داروی جدید</h3>
         <div class="row top-10">
           <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-drug="" required>
+          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-shop="" required>
           <span class="glyphicon glyphicon-remove d-none" id="remove_drug"></span>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
@@ -38,12 +38,13 @@
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
         <h1>داروهای شما</h1>
         <div id="all_drugs">
-          {% for item in surplus_drugs %}
+          {% for item in drugs %}
             <div class="col-lg-6 col-md-6 col-sm-6 text-center">
               <div class="box">
-                <div class="box-title">{{item.drug__name}}</div>
-                <div class="box-content"> تعداد: {{item.count}}</div>
-                <div class="box-content"> انقضا: {{item.expiration_date.year}}/{{item.expiration_date.month}}</div>
+                <div class="box-title">{{item.surplus_drug__drug__name}}</div>
+                <div class="box-content"> تعداد سفارش: {{item.ordered_count}}</div>
+                <div class="box-content"> بیمارستان: {{item.surplus_drug__hospital__name}}</div>
+                <div class="box-content"> انقضا: {{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</div>
               </div>
             </div>
           {% endfor %}
@@ -75,7 +76,7 @@
         }
         $("#remove_drug").click(function(){
             $("#drug_name").val('');
-            $("#drug_name").attr("data-drug", "");
+            $("#drug_name").attr("data-shop", "");
             $("#remove_drug").hide();
         });
 
@@ -98,7 +99,7 @@
           e.defaultPrevented;
           var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
           var drugName = $("#drug_name").val();
-          var drugId = $("#drug_name").attr("data-drug");
+          var drugId = $("#drug_name").attr("data-shop");
           var drugCount = $("#drug_count").val();
           var hospitalId = $("#hospital_id").val();
           var drugMonth = $("#drug_month").val();

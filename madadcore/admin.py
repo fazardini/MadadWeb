@@ -12,7 +12,7 @@ class DrugAdmin(admin.ModelAdmin):
 
 
 class SurplusDrugAdmin(admin.ModelAdmin):
-    list_display = ('safe_id', 'count', 'expiration_date', 'hospital', 'drug')
+    list_display = ('safe_id', 'initial_count', 'current_count', 'expiration_date', 'hospital', 'drug')
 
 
 class OrderedDrugAdmin(admin.ModelAdmin):

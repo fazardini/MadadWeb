@@ -121,15 +121,39 @@
                 csrfmiddlewaretoken: csrftoken,
               },
               success : function(json) {
-
                 if (json.hospitals) {
                   $("#show_modal").trigger( "click" ); 
                   $(".modal-body").html('');
                   for (i in json.hospitals) {
-                    $(".modal-body").append('<p>'+json.hospitals[i]['hospital__name']+'</p>');
+                    $(".modal-body").append('<div><span>'+json.hospitals[i]['hospital__name']+'<span><input id="order_count'+json.hospitals[i]['safe_id']+'"><span class="save-order" id="save_'+json.hospitals[i]['safe_id']+'">ثبت</span></div>');
                   }
+                  $(".save-order").click(function(e){
+                    var str = this.id;
+                    var drugId = str.split("_")[1];
+                    alert(drugId);
+                    var count = $("#order_count"+drugId).val();
+                    $.ajax({
+                      url : "/save-order/", 
+                      type : "POST",
+                      dataType: "json", 
+                      data : {
+                        drug_id : drugId,
+                        count: count,
+                        csrfmiddlewaretoken: csrftoken,
+                      },
+                      success : function(json) {
+                        if(json.done)
+                          alert(json.done);
+                        if (json.not_exist) {
+                          alert("False");
+                        }
+                      },
+                      error : function(xhr,errmsg,err) {
+                        alert("عملیات با مشکل مواجه شد.");
+                      },
+                    });
+                  });
                 }
-
               },
               error : function(xhr,errmsg,err) {
                   alert("عملیات با مشکل مواجه شد.");

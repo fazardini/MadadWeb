@@ -84,7 +84,7 @@ def my_drugs(request, safe_id):
                     safe_id = token_hex(8)
                     drug = Drug.objects.create(name=name, safe_id=safe_id)
                 safe_id = token_hex(8)
-                SurplusDrug.objects.create(safe_id=safe_id, count=count, expiration_date=drug_date,
+                SurplusDrug.objects.create(safe_id=safe_id, current_count=count, initial_count=count, expiration_date=drug_date,
                                            drug=drug, hospital=hospital)
                 done = True
             except Exception as e:
@@ -96,7 +96,7 @@ def my_drugs(request, safe_id):
         return JsonResponse(response_dict)
     if access:
         surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('drug__name', 'expiration_date',
-                                                                            'count')
+                                                                            'current_count')
         context_dict = {'access': access, 'hospital_id': safe_id, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
@@ -160,10 +160,26 @@ def change_order_state(request):
 def hospitals_drug(request):
     drug_id = request.POST.get('drug_id')
     hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).values(
-        'hospital__name', 'expiration_date', 'count')
+        'hospital__name', 'expiration_date', 'current_count', 'safe_id')
 
     return JsonResponse({'hospitals': list(hospitals)})
 
 
 def save_order(request):
-    return 1
+    drug_id = request.POST.get('drug_id')
+    count = float(request.POST.get('count'))
+    surplus_drug = SurplusDrug.objects.filter(safe_id=drug_id).first()
+    response_dict = {}
+    try:
+        if surplus_drug.current_count >= count:
+            safe_id = token_hex(8)
+            OrderedDrug.objects.create(safe_id=safe_id, ordered_count=count, client_hospital=request.user.hospital,
+                                       surplus_drug=surplus_drug)
+            surplus_drug.current_count -= count
+            surplus_drug.save()
+            response_dict = {'done': True}
+        else:
+            response_dict = {'not_exist': True}
+    except Exception as e:
+        err = e
+    return JsonResponse(response_dict)

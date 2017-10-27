@@ -29,8 +29,8 @@ class Drug(models.Model):
 
 class SurplusDrug(models.Model):
     safe_id = models.CharField(max_length=16, null=False, unique=True)
-    current_count = models.FloatField(default=0)
-    initial_count = models.FloatField(default=0)
+    current_count = models.IntegerField(default=0)
+    initial_count = models.IntegerField(default=0)
     expiration_date = models.DateField(auto_now=False)
     hospital = models.ForeignKey(
         Hospital,

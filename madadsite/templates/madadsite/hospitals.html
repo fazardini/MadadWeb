@@ -1,6 +1,14 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
 
+{% block active_menu %}
+    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
+    <li><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
+    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li class="active"><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
+{% endblock %}
+
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">

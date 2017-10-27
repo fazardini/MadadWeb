@@ -6,11 +6,19 @@
 {% block header %}
 {% endblock %}
 
+{% block active_menu %}dsadas
+    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
+    <li><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
+    <li class="active"><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
+{% endblock %}
+
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
       <div class="col-lg-4 col-md-4 col-sm-4 right-part">
-        <h3>افزودن داروی جدید</h3>
+        <h3>فیلترها</h3>
         <div class="row top-10">
           <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
           <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-shop="" required>
@@ -36,19 +44,29 @@
         <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
       </div>
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
-        <h1>داروهای شما</h1>
-        <div id="all_drugs">
-          {% for item in drugs %}
-            <div class="col-lg-6 col-md-6 col-sm-6 text-center">
-              <div class="box">
-                <div class="box-title">{{item.surplus_drug__drug__name}}</div>
-                <div class="box-content"> تعداد سفارش: {{item.ordered_count}}</div>
-                <div class="box-content"> بیمارستان: {{item.surplus_drug__hospital__name}}</div>
-                <div class="box-content"> انقضا: {{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+        <h1>داروهای سفارش داده شده</h1>
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>نام دارو</th>
+                <th>تاریخ انقضا</th>
+                <th>نام بیمارستان</th>
+                <th>تعداد سفارش</th>
+                <!-- <th>وضعیت</th> -->
+              </tr>
+            </thead>
+            <tbody id="all_drugs">
+              {% for item in drugs %}
+                <tr>
+                  <td>{{item.surplus_drug__drug__name}}</td>
+                  <td>{{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</td>
+                  <td>{{item.surplus_drug__hospital__name}}</td>
+                  <td>{{item.ordered_count}}</td>
+                  <!-- <td></td> -->
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
       </div>
     </div>
   </div>

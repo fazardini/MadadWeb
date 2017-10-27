@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from secrets import token_hex
 from datetime import date
+from django.db.models import Sum
 import calendar
 import json
 
@@ -131,7 +132,7 @@ def all_hospitals(request):
 
 
 def all_drugs(request):
-    all_drugs = SurplusDrug.objects.all().values('drug__name', 'drug__safe_id')
+    all_drugs = SurplusDrug.objects.all().distinct().values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/all_drugs.html', context_dict)
 
@@ -159,10 +160,11 @@ def change_order_state(request):
 
 def hospitals_drug(request):
     drug_id = request.POST.get('drug_id')
+    drun_name = Drug.objects.filter(safe_id=drug_id).first().name
     hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).values(
         'hospital__name', 'expiration_date', 'current_count', 'safe_id')
 
-    return JsonResponse({'hospitals': list(hospitals)})
+    return JsonResponse({'hospitals': list(hospitals), 'drun_name': drun_name})
 
 
 def save_order(request):

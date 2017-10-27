@@ -23,6 +23,12 @@ header{
     background-color: green;
     width: 100%;
 }
+.float-left{
+    float: left;
+}
+.margin-10{
+    margin: 10px;
+}
 div.right-part{
     background-color: #ccc;
 }
@@ -53,4 +59,12 @@ div.box div.box-title{
     background: #000;
     width: 100%;
     padding: 5px;
+}
+td.save-order div, div.drug-hospital{
+    color: #ffffff;
+    background: #393939;
+    border-radius: 5px;
+    text-align: center;
+    padding: 5px;
+    cursor: pointer;
 }

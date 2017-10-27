@@ -6,6 +6,14 @@
 {% block header %}
 {% endblock %}
 
+{% block active_menu %}
+    <li class="active"><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
+    <li><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
+    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
+{% endblock %}
+
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
@@ -32,22 +40,29 @@
           <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="سال" id="drug_year" required>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
-        <button type="submit" id="add_drug">افزودن دارو</button>
+        <button type="submit" id="add_drug" class="float-left margin-10">افزودن دارو</button>
         <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
       </div>
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
         <h1>داروهای شما</h1>
-        <div id="all_drugs">
-          {% for item in surplus_drugs %}
-            <div class="col-lg-6 col-md-6 col-sm-6 text-center">
-              <div class="box">
-                <div class="box-title">{{item.drug__name}}</div>
-                <div class="box-content"> تعداد: {{item.current_count}}</div>
-                <div class="box-content"> انقضا: {{item.expiration_date.year}}/{{item.expiration_date.month}}</div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>نام</th>
+              <th>تاریخ انقضا</th>
+              <th>تعداد مازاد</th>
+            </tr>
+          </thead>
+          <tbody id="all_drugs">
+            {% for item in surplus_drugs %}
+              <tr>
+                <td>{{item.drug__name}}</td>
+                <td>{{item.expiration_date.year}}/{{item.expiration_date.month}}</td>
+                <td>{{item.current_count}}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -118,7 +133,7 @@
               success : function(json) {
                   // alert(json.done);
                 if (json.done) {
-                  $("#all_drugs").prepend('<div class="col-lg-6 col-md-6 col-sm-6 text-center"><div class="box"><div class="box-title">'+drugName+'</div><div class="box-content"> تعداد: '+drugCount+'</div><div class="box-content"> انقضا: '+drugYear+'/'+drugMonth+'</div></div></div>');
+                  $("#all_drugs").prepend('<tr><td>'+drugName+'</td><td> '+drugYear+'/'+drugMonth+'</td><td>'+drugCount+'</td></tr>');
                   alert("دارو با موفقیت ثبت شد!");
                 }
                 else{

@@ -6,6 +6,14 @@
 {% block header %}
 {% endblock %}
 
+{% block active_menu %}
+    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
+    <li class="active"><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
+    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
+{% endblock %}
+
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
@@ -32,17 +40,24 @@
       </div>
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
         <h1>همه داروهای مازاد</h1>
-        <div id="all_drugs">
-          {% for item in drugs %}
-            <div class="col-lg-6 col-md-6 col-sm-6 text-center">
-              <div class="box drug-hospital" id="drug_{{item.drug__safe_id}}">
-                <div class="box-title">{{item.drug__name}}</div>
-                <div class="box-content"> تعداد: {{item.count}}</div>
-                <div class="box-content"> انقضا: {{item.expiration_date.year}}/{{item.expiration_date.month}}</div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>نام</th>
+              <th>تعداد کل مازاد</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="all_drugs">
+            {% for item in drugs %}
+              <tr>
+                <td>{{ item.drug__name }}</td>
+                <td>{{ item.sum_count }}</td>
+                <td><div class="drug-hospital" id="drug_{{item.drug__safe_id}}">نمایش جزئیات</div></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 <!-- Modal -->
 <button type="button" class="btn btn-info btn-lg d-none" id="show_modal" data-toggle="modal" data-target="#myModal"></button>
@@ -51,9 +66,22 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">لیست بیمارستان ها</h4>
+          <h4 class="modal-title">داروی <div id="drug_name_modal"></div></h4>
         </div>
         <div class="modal-body">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>نام بیمارستان</th>
+                <th>تاریخ انقضا</th>
+                <th>تعداد مازاد</th>
+                <th>تعداد سفارش</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="hospitals_drug">
+            </tbody>
+          </table>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -123,9 +151,11 @@
               success : function(json) {
                 if (json.hospitals) {
                   $("#show_modal").trigger( "click" ); 
-                  $(".modal-body").html('');
-                  for (i in json.hospitals) {
-                    $(".modal-body").append('<div><span>'+json.hospitals[i]['hospital__name']+'<span><input id="order_count'+json.hospitals[i]['safe_id']+'"><span class="save-order" id="save_'+json.hospitals[i]['safe_id']+'">ثبت</span></div>');
+                  $("#hospitals_drug").html('');
+                  $("#drug_name_modal").html(json.drun_name);
+                  var hospitals = json.hospitals;
+                  for (i in hospitals) {
+                    $("#hospitals_drug").append('<tr><td>'+hospitals[i]['hospital__name']+'</td><td>'+hospitals[i]['expiration_date']+'</td><td>'+hospitals[i]['current_count']+'</td><td><input id="order_count'+hospitals[i]['safe_id']+'"></td><td class="save-order" id="save_'+hospitals[i]['safe_id']+'"><div>ثبت</div></td></tr>');
                   }
                   $(".save-order").click(function(e){
                     var str = this.id;

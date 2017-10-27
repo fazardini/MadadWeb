@@ -20,24 +20,30 @@
       <div class="col-lg-4 col-md-4 col-sm-4 right-part">
         <h3>فیلترها</h3>
         <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-shop="" required>
-          <span class="glyphicon glyphicon-remove d-none" id="remove_drug"></span>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-        </div>
-        <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام بیمارستان</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="تعداد دارو" id="drug_count" required>
+              <div class="search-box col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                <div class="input-group">
+                    <input type="text" id="search_text" placeholder="" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-lg" type="button" id="search">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
         <div class="row top-10">
           <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">مرتب سازی</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="ماه" id="drug_month" required>
+          <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="sort" required>
+            <option value="1">بیشترین تعداد مازاد</option>
+            <option value="2">کمترین تعداد مازاد</option>
+          </select>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
-        <button type="submit" id="add_drug">جستجو</button>
-        <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
+        <input type="text" class="d-none" id="hospital_id" value="{{ safe_id }}">
       </div>
+
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
         <h1>همه داروهای مازاد</h1>
         <table class="table table-bordered table-striped">
@@ -150,7 +156,7 @@
               },
               success : function(json) {
                 if (json.hospitals) {
-                  $("#show_modal").trigger( "click" ); 
+                  $("#show_modal").trigger( "click" );
                   $("#hospitals_drug").html('');
                   $("#drug_name_modal").html(json.drun_name);
                   var hospitals = json.hospitals;
@@ -190,6 +196,93 @@
               }
           });
           return false;
+        });
+        $("#sort").change(function () {
+          $("#search").trigger( "click" ); 
+        });
+        $("#search").click(function(e){
+          e.defaultPrevented;
+          var searchText = $("#search_text").val();
+          var sortedBy = $("#sort").val();
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          $.ajax({
+            url : "/drugs/all/", 
+            type : "POST",
+            dataType: "json", 
+            data : {
+              search_text : searchText,
+              sorted_by: sortedBy,
+              csrfmiddlewaretoken: csrftoken,
+            },
+            success : function(json) {
+              $("#all_drugs").html('');
+              var drugs = json.drugs;
+              if(drugs){
+                for(i in drugs){
+                  $("#all_drugs").append('<tr><td>'+drugs[i]['drug__name']+'</td><td>'+drugs[i]['sum_count']+'</td><td><div class="drug-hospital" id="drug_'+drugs[i]['drug__safe_id']+'">نمایش جزئیات</div></td></tr>');
+                }
+                $(".drug-hospital").click(function(e){
+                  e.defaultPrevented;
+                  var str = this.id;
+                  var drugId = str.split("_")[1];
+                  var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+                  $.ajax({
+                      url : "/hospitals-drug/", 
+                      type : "POST",
+                      dataType: "json", 
+                      data : {
+                        drug_id : drugId,
+                        csrfmiddlewaretoken: csrftoken,
+                      },
+                      success : function(json) {
+                        if (json.hospitals) {
+                          $("#show_modal").trigger( "click" );
+                          $("#hospitals_drug").html('');
+                          $("#drug_name_modal").html(json.drun_name);
+                          var hospitals = json.hospitals;
+                          for (i in hospitals) {
+                            $("#hospitals_drug").append('<tr><td>'+hospitals[i]['hospital__name']+'</td><td>'+hospitals[i]['expiration_date']+'</td><td>'+hospitals[i]['current_count']+'</td><td><input id="order_count'+hospitals[i]['safe_id']+'"></td><td class="save-order" id="save_'+hospitals[i]['safe_id']+'"><div>ثبت</div></td></tr>');
+                          }
+                          $(".save-order").click(function(e){
+                            var str = this.id;
+                            var drugId = str.split("_")[1];
+                            alert(drugId);
+                            var count = $("#order_count"+drugId).val();
+                            $.ajax({
+                              url : "/save-order/", 
+                              type : "POST",
+                              dataType: "json", 
+                              data : {
+                                drug_id : drugId,
+                                count: count,
+                                csrfmiddlewaretoken: csrftoken,
+                              },
+                              success : function(json) {
+                                if(json.done)
+                                  alert(json.done);
+                                if (json.not_exist) {
+                                  alert("False");
+                                }
+                              },
+                              error : function(xhr,errmsg,err) {
+                                alert("عملیات با مشکل مواجه شد.");
+                              },
+                            });
+                          });
+                        }
+                      },
+                      error : function(xhr,errmsg,err) {
+                          alert("عملیات با مشکل مواجه شد.");
+                      }
+                  });
+                  return false;
+                });
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              alert("عملیات با مشکل مواجه شد.");
+            },
+          });
         });
       });
     </script>

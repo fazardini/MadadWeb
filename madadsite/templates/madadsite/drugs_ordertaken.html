@@ -18,31 +18,34 @@
   <div class="container-fluid">
     <div class="row my-drugs">
       <div class="col-lg-4 col-md-4 col-sm-4 right-part">
-        <h3>افزودن داروی جدید</h3>
+        <h3>فیلترها</h3>
         <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-shop="" required>
-          <span class="glyphicon glyphicon-remove d-none" id="remove_drug"></span>
+          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+              <div class="search-box col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                <div class="input-group">
+                    <input type="text" id="search_text" placeholder="" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-lg" type="button" id="search">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
         <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">تعداد</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="تعداد دارو" id="drug_count" required>
+          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">مرتب سازی</label>
+          <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="sort" required>
+            <option value="1">بیشترین تعداد مازاد</option>
+            <option value="2">کمترین تعداد مازاد</option>
+            <option value="3">زودترین انقضا</option>
+            <option value="4">دیرترین انقضا</option>
+          </select>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
-        <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">ماه انقضا</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="ماه" id="drug_month" required>
-          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-        </div>
-        <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">سال انقضا</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="سال" id="drug_year" required>
-          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-        </div>
-        <button type="submit" id="add_drug">افزودن دارو</button>
-        <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
+        <input type="text" class="d-none" id="hospital_id" value="{{ safe_id }}">
       </div>
+
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
         <h1>داروهای سفارش گرفته شده</h1>
           <table class="table table-bordered table-striped">
@@ -72,86 +75,37 @@
   </div>
     <script type="text/javascript">
       $(document).ready(function(){
-        $(function() {
-            $("#drug_name").autocomplete({
-                source: '/drugs-name/',
-                select: function (event, ui) { //item selected
-                    AutoCompleteSelectHandlerShop(event, ui)
-                },
-                minLength: 2,
-            });
+        $("#sort").change(function () {
+          $("#search").trigger( "click" ); 
         });
-
-        function AutoCompleteSelectHandlerShop(event, ui)
-        {
-            var selectedObj = ui.item;
-            $("#remove_drug").show();
-            if(selectedObj.id)
-                $("#drug_name").attr("data-drug", selectedObj.id);
-            else
-                $("#drug_name").attr("data-drug", "");
-            var selectedObj = ui.item;
-        }
-        $("#remove_drug").click(function(){
-            $("#drug_name").val('');
-            $("#drug_name").attr("data-shop", "");
-            $("#remove_drug").hide();
-        });
-
-        function isNumberKey(evt){
-          var charCode = (evt.which) ? evt.which : event.keyCode;
-          if (charCode > 31 && (charCode < 48 || charCode > 57))
-            return false;
-          return true;
-        }
-        $("#drug_count").keypress(function(evt){
-          return isNumberKey(evt);
-        });
-        $("#drug_month").keypress(function(evt){
-          return isNumberKey(evt);
-        });
-        $("#drug_year").keypress(function(evt){
-          return isNumberKey(evt);
-        });
-        $("#add_drug").click(function(e){
+        $("#search").click(function(e){
           e.defaultPrevented;
+          var searchText = $("#search_text").val();
+          var sortedBy = $("#sort").val();
           var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-          var drugName = $("#drug_name").val();
-          var drugId = $("#drug_name").attr("data-shop");
-          var drugCount = $("#drug_count").val();
-          var hospitalId = $("#hospital_id").val();
-          var drugMonth = $("#drug_month").val();
-          var drugYear = $("#drug_year").val();
+          var safeId = $("#hospital_id").val();
           $.ajax({
-              url : "/drugs/"+hospitalId+"/", 
-              type : "POST",
-              dataType: "json", 
-              data : {
-                drug_name : drugName,
-                drug_id : drugId,
-                drug_count : drugCount,
-                drug_month: drugMonth,
-                drug_year: drugYear,
-                csrfmiddlewaretoken: csrftoken,
-              },
-              success : function(json) {
-                  // alert(json.done);
-                if (json.done) {
-                  $("#all_drugs").prepend('<div class="col-lg-6 col-md-6 col-sm-6 text-center"><div class="box"><div class="box-title">'+drugName+'</div><div class="box-content"> تعداد: '+drugCount+'</div><div class="box-content"> انقضا: '+drugYear+'/'+drugMonth+'</div></div></div>');
-                  alert("دارو با موفقیت ثبت شد!");
+            url : "/order-token-drugs/"+safeId+'/', 
+            type : "POST",
+            dataType: "json", 
+            data : {
+              search_text : searchText,
+              sorted_by: sortedBy,
+              csrfmiddlewaretoken: csrftoken,
+            },
+            success : function(json) {
+              $("#all_drugs").html('');
+              var drugs = json.drugs;
+              if(drugs){
+                for(i in drugs){
+                  $("#all_drugs").append('<tr><td>'+drugs[i]['surplus_drug__drug__name']+'</td><td>'+drugs[i]['surplus_drug__expiration_date']+'</td><<td>'+drugs[i]['client_hospital__name']+'</td><td>'+drugs[i]['ordered_count']+'</td></tr>');
                 }
-                else{
-                  alert("ثبت دارو با شکست مواجه شد");
-                }
-                if(!json.access){
-                  alert("دسترسی غیرمجاز!");
-                }
-              },
-              error : function(xhr,errmsg,err) {
-                  alert("ثبت بیمارستان با مشکل مواجه شد.");
               }
+            },
+            error : function(xhr,errmsg,err) {
+              alert("عملیات با مشکل مواجه شد.");
+            },
           });
-          return false;
         });
       });
     </script>

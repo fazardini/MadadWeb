@@ -15,22 +15,30 @@
       <div class="col-lg-4 col-md-4 col-sm-4 right-part">
         <h3>جستجوی بیماستان</h3>
         <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام</label>
-          <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="" id="search_text" required>
+          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+              <div class="search-box col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                <div class="input-group">
+                    <input type="text" id="search_text" placeholder="" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-lg" type="button" id="hospital_search">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
-        <button type="submit" id="hospital_search">جستجو</button>
         <input type="text" class="d-none" id="hospital_id" value="{{ hospital_id }}">
       </div>
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
         <h1>بیمارستان ها</h1>
         <div id="all_hospitals">
           {% for item in hospitals %}
-            <div class="col-lg-6 col-md-6 col-sm-6 text-center">
+            <div class="col-lg-6 col-md-6 col-sm-6">
               <div class="box">
-                <div class="box-title">{{item.name}}</div>
-                <div class="box-content">آدرس بیمارستان: {{item.address}}</div>
-                <div class="box-content">شماره تلفن بیمارستان: {{item.phone}}</div>
+                <div class="box-title text-center">{{item.name}}</div>
+                <div class="box-content padding-right-10">آدرس بیمارستان: {{item.address}}</div>
+                <div class="box-content padding-right-10">شماره تلفن بیمارستان: {{item.phone}}</div>
               </div>
             </div>
           {% endfor %}
@@ -53,7 +61,12 @@
                 csrfmiddlewaretoken: csrftoken,
               },
               success : function(json) {
-                if (json.done) {
+                $("#all_hospitals").html('');
+                var hospitals = json.hospitals;
+                if (hospitals) {
+                  for (i in hospitals){
+                    $("#all_hospitals").append('<div class="col-lg-6 col-md-6 col-sm-6"><div class="box"><div class="box-title text-center">'+hospitals[i]['name']+'</div><div class="box-content padding-right-10">آدرس بیمارستان: '+hospitals[i]['address']+'</div><div class="box-content padding-right-10">شماره تلفن بیمارستان: '+hospitals[i]['phone']+'</div></div></div>');
+                  }
                 }
               },
               error : function(xhr,errmsg,err) {

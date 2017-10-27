@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from secrets import token_hex
 from datetime import date
-from django.db.models import Sum
+from django.db.models import Sum, Q
 import calendar
 import json
 
@@ -98,13 +98,34 @@ def my_drugs(request, safe_id):
     if access:
         surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('drug__name', 'expiration_date',
                                                                             'current_count')
-        context_dict = {'access': access, 'hospital_id': safe_id, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
+        context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
         return render(request, 'madadsite/drugs.html', {'access': access})
 
 
 def ordered_drugs(request, safe_id):
+    if request.method == 'POST':
+        search_text = request.POST.get('search_text')
+        sort_by = int(request.POST.get('sorted_by', 0))
+        all_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id)
+        if search_text:
+            all_drugs = all_drugs.filter(
+                Q(surplus_drug__drug__name__icontains=search_text) | Q(surplus_drug__hospital__name__icontains=search_text))
+        all_drugs = all_drugs.values(
+            'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+            'client_hospital__name', 'safe_id')
+        if sort_by == 1:
+            all_drugs = all_drugs.order_by('-ordered_count')
+        elif sort_by == 2:
+            all_drugs = all_drugs.order_by('ordered_count')
+        elif sort_by == 3:
+            all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
+        elif sort_by == 4:
+            all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
+        response_dict = {'drugs': list(all_drugs)}
+        return JsonResponse(response_dict)
+
     ordered_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
         'surplus_drug__hospital__name', 'safe_id')
@@ -113,9 +134,30 @@ def ordered_drugs(request, safe_id):
 
 
 def order_token_drugs(request, safe_id):
+    if request.method == 'POST':
+        search_text = request.POST.get('search_text')
+        sort_by = int(request.POST.get('sorted_by', 0))
+        all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id)
+        if search_text:
+            all_drugs = all_drugs.filter(
+                Q(surplus_drug__drug__name__icontains=search_text) | Q(client_hospital__name__icontains=search_text))
+        all_drugs = all_drugs.values(
+            'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+            'client_hospital__name', 'safe_id')
+        if sort_by == 1:
+            all_drugs = all_drugs.order_by('-ordered_count')
+        elif sort_by == 2:
+            all_drugs = all_drugs.order_by('ordered_count')
+        elif sort_by == 3:
+            all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
+        elif sort_by == 4:
+            all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
+        response_dict = {'drugs': list(all_drugs)}
+        return JsonResponse(response_dict)
+
     all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'client_hospital__name', 'safe_id')
+        'client_hospital__name', 'safe_id').order_by('-ordered_count')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordertaken.html', context_dict)
 
@@ -132,7 +174,23 @@ def all_hospitals(request):
 
 
 def all_drugs(request):
-    all_drugs = SurplusDrug.objects.all().distinct().values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
+    if request.method == 'POST':
+        search_text = request.POST.get('search_text')
+        sort_by = int(request.POST.get('sorted_by', 0))
+        all_drugs = SurplusDrug.objects.all().values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
+        if search_text:
+            all_drugs = all_drugs.filter(
+                Q(drug__name__icontains=search_text) | Q(drug__name__icontains=search_text)).values(
+                'drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
+        if sort_by == 1:
+            all_drugs = all_drugs.order_by('-sum_count')
+        elif sort_by == 2:
+            all_drugs = all_drugs.order_by('sum_count')
+        response_dict = {'drugs': list(all_drugs)}
+        return JsonResponse(response_dict)
+    all_drugs = SurplusDrug.objects.all().distinct().values(
+        'drug__name', 'drug__safe_id').annotate(
+        sum_count=Sum('current_count')).order_by('-sum_count')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/all_drugs.html', context_dict)
 

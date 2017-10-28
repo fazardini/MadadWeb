@@ -1,157 +1,47 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ورود به سایت مدد</title>
     <!-- <link rel="icon" href="{% static 'panel/images/favicon.ico' %}" type="image/x-icon" /> -->
-    <link href="{% static 'madadsite/css/register.css' %}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'madadsite/css/bootstrap-rtl.min.css' %}">
+    <link href="{% static 'madadsite/css/loginStyle.css' %}" rel="stylesheet"/>
     <script src="{% static 'madadsite/js/jquery.min.js' %}"></script>
-<!--         <link href="{% static 'panel/content/Animate.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/FontAwesome.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/Remodal.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/QuestionsBank/Theme/Core.css' %}" rel="stylesheet" type="text/css" />
-    <link href="{% static 'panel/content/PersianDatepicker.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/Select2.css' %}" rel="stylesheet"/>
-    <link href="{% static 'panel/content/QuestionsBank/QuestionsList/Core.css' %}" rel="stylesheet"/>
-    <script src="{% static 'panel/scripts/jquery.min.js' %}"></script>
-    <script src="{% static 'panel/scripts/Autocomplete.js' %}"></script> -->
   </head>
   <body>
-  
-    <h1>ورود به سایت مدد</h1>
-    <form method="POST" action="{% url 'login' %}">
-    {% csrf_token %}
-      <div class="container">
-        <label><b>نام کاربری</b></label>
-        <input type="text" placeholder="نام کاربری که برای ورود به سایت میخواهید استفاده کنید را وارد کنید" name="username" required>
-        <label><b>رمز عبور</b></label>
-        <input type="password" placeholder="رمز عبور خود را وارد کنید" name="password" required>
-
-        <div class="clearfix">
-          <!-- <button type="button" class="cancelbtn">انصراف</button> -->
-          <button type="submit" class="signupbtn">ثبت نام</button>
-        </div>
-        <div class="err">
-        {% if error %}
-        نام کاربری یا رمز عبور نادرست است!
-        {% endif %}
-        {% if active_error %}
-        نام کاربری شما فعال نشده است. لطفا با ادمین تماس بگیرید!
-        {% endif %}
-        </div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4"></div>
+        <div class="col-lg-4 col-md-4 col-sm-4 text-center"><img class="logo" src="{% static 'madadsite/images/logoHeader.png' %}"></div>
+        <div class="col-lg-4 col-md-4 col-sm-4"></div>
       </div>
-    </form>
-    <script type="text/javascript">
-      $(document).ready(function(){
-        function isNumberKey(evt){
-          var charCode = (evt.which) ? evt.which : event.keyCode;
-          if (charCode > 31 && (charCode < 48 || charCode > 57))
-            return false;
-          return true;
-        }
-        $("#mobile").keypress(function(evt){
-          return isNumberKey(evt);
-        });
-        $("#phone").keypress(function(evt){
-          return isNumberKey(evt);
-        });
-        $("#register_form").submit(function(e){
-          e.defaultPrevented;
-          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-          var firstName = $("#fname").val();
-          var lastName = $("#lname").val();
-          var username = $("#username").val();
-          var hospitalName = $("#hospital_name").val();
-          var phone = $("#phone").val();
-          var mobile = $("#mobile").val();
-          var password = $("#psw").val();
-          var passwordRepeat = $("#psw_repeat").val();
-          var phoneno = /^[0][9][0-9]{9}$/;
-
-          if(password.length<5){
-            alert("لطفا رمز عبور خود را بیشتر از ۵ کاراکتر انتخاب کنید");
-            return false;
-          }
-          if(password!=passwordRepeat){
-            alert("رمز عبور و تکرار آن مطابقت ندارند!");
-            return false;
-          }
-          if(!mobile.match(phoneno)) {
-            alert("لطفا شماره همراه درست را وارد کنید");
-            return false;
-          }
-
-          $.ajax({
-              url : "/register/", 
-              type : "POST",
-              dataType: "json", 
-              data : {
-                first_name : firstName,
-                last_name : lastName,
-                username : username,
-                hospital_name : hospitalName,
-                phone : phone,
-                mobile : mobile,
-                password : password,
-                csrfmiddlewaretoken: csrftoken,
-              },
-              success : function(json) {
-                  // alert(json.done);
-                if (json.done) {
-                  alert("بیمارستان با موفقیت ثبت شد. لطفا برای فعال شدن دسترسی به سایت منتظر بمانید. پس از فعالسازی از طریف صفحه ورود، وارد سایت شوید و از خدمات استفاده کنید!");
-                }
-                if(json.error){
-                  alert("این نام کاربری قبلا انتخاب شده است. لطفا با نام کاربری جدید ثبت نام کنید");
-                }
-              },
-              error : function(xhr,errmsg,err) {
-                  alert("ثبت بیمارستان با مشکل مواجه شد.");
-              }
-          });
-          return false;
-          // ajax = $.ajax({
-          //   url : "/register/", 
-          //   type: "post",
-          //   dataType: "json", 
-          //   // contentType: "application/json",
-          //   data : {
-          //     first_name : firstName,
-          //     last_name : lastName,
-          //     username : username,
-          //     hospital_name : hospitalName,
-          //     phone : phone,
-          //     mobile : mobile,
-          //     password : password,
-          //     csrfmiddlewaretoken: csrftoken,
-          //   },
-          //   success: function (response) {
-          //     alert(response);
-          //     alert(response.done);
-          //     if (response.done) {
-          //       alert("بیمارستان با موفقیت ثبت شد. لطفا برای فعال شدن دسترسی به سایت منتظر بمانید. پس از فعالسازی از طریف صفحه ورود، وارد سایت شوید و از خدمات استفاده کنید!");
-          //     }
-          //     if(response.error){
-          //       alert("این نام کاربری قبلا انتخاب شده است. لطفا با نام کاربری جدید ثبت نام کنید");
-          //     }
-          //   },
-          //   error: function (jqXHR, textStatus, errorThrown) {
-
-          //       alert("jqXHR: " + jqXHR.responseText + "\ntextStatus: " + textStatus + "\nerrorThrown: " + errorThrown);
-          //   }
-            // error : function(e) {
-            //     alert(e.status + ": " + e.responseText);
-            //     alert(e.readyState);
-            // }
-            // error: function (e) {
-            //   alert(e);
-            //   // alert("ثبت بیمارستان با مشکل مواجه شد.");
-            // },
-          // });
-
-        });
-      });
-    </script>
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4"></div>
+        <div class="col-lg-4 col-md-4 col-sm-4 card card-container">
+          <h2 class='login_title text-center'>ورود</h2>
+          <hr>
+          <form class="form-signin" method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <span id="reauth-email" class="reauth-email"></span>
+            <p class="input_title">نام کاربری</p>
+            <input type="text" name="username" class="login_box" placeholder="username" required autofocus>
+            <p class="input_title">رمز عبور</p>
+            <input type="password" name="password" class="login_box" placeholder="******" required>
+            <div class="err">
+              {% if error %}
+                نام کاربری یا رمز عبور نادرست است!
+              {% endif %}
+              {% if active_error %}
+                نام کاربری شما فعال نشده است. لطفا با ادمین تماس بگیرید!
+              {% endif %}
+            </div>
+            <button class="btn btn-lg btn-primary" type="submit">ورود</button>
+          </form><!-- /form -->
+        </div><!-- /card-container -->
+        <div class="col-lg-4 col-md-4 col-sm-4"></div>
+      </div>
+    </div><!-- /container -->
   </body>
 </html>

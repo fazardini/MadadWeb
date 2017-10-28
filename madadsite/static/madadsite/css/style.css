@@ -19,9 +19,18 @@ body{
     direction: rtl;
 }
 header{
-    height: 50px;
-    background-color: green;
+    background: #5d1472; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left, #530cd3 , #5d1472); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(right, #530cd3, #5d1472); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(right, #530cd3, #5d1472); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to right, #530cd3 , #5d1472); /* Standard syntax */
     width: 100%;
+}
+header div img{
+    width: 100%;
+}
+.margin-0{
+    margin: 0 !important;
 }
 .float-left{
     float: left;

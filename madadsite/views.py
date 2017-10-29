@@ -17,6 +17,7 @@ def register(request):
         last_name = request.POST.get('last_name')
         username = request.POST.get('username')
         hospital_name = request.POST.get('hospital_name')
+        address = request.POST.get('address')
         phone = request.POST.get('phone')
         mobile = request.POST.get('mobile')
         password = request.POST.get('password')
@@ -30,7 +31,7 @@ def register(request):
                 user.save()
                 safe_id = token_hex(8)
                 Hospital.objects.create(safe_id=safe_id, name=hospital_name,
-                                        mobile=mobile, phone=phone, user=user)
+                                        mobile=mobile, phone=phone, user=user, address=address)
                 done = True
             except Exception as e:
                 done = False
@@ -107,14 +108,12 @@ def my_drugs(request, safe_id):
 def ordered_drugs(request, safe_id):
     if request.method == 'POST':
         search_text = request.POST.get('search_text')
-        sort_by = int(request.POST.get('sorted_by', 0))
+        sort_by = int(request.POST.get('sorted_by', 1))
         all_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id)
         if search_text:
             all_drugs = all_drugs.filter(
                 Q(surplus_drug__drug__name__icontains=search_text) | Q(surplus_drug__hospital__name__icontains=search_text))
-        all_drugs = all_drugs.values(
-            'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-            'client_hospital__name', 'safe_id')
+        # import ipdb; ipdb.set_trace()
         if sort_by == 1:
             all_drugs = all_drugs.order_by('-ordered_count')
         elif sort_by == 2:
@@ -123,12 +122,18 @@ def ordered_drugs(request, safe_id):
             all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
         elif sort_by == 4:
             all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
+        all_drugs = all_drugs.values(
+            'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+            'surplus_drug__hospital__name', 'safe_id')
+
+        for drug in all_drugs:
+            drug['surplus_drug__expiration_date'] = "{}/{}".format(drug['surplus_drug__expiration_date'].year, drug['surplus_drug__expiration_date'].month)
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
 
     ordered_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'surplus_drug__hospital__name', 'safe_id')
+        'surplus_drug__hospital__name', 'safe_id').order_by('surplus_drug__expiration_date')
     context_dict = {'drugs': list(ordered_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordered.html', context_dict)
 
@@ -141,23 +146,28 @@ def order_token_drugs(request, safe_id):
         if search_text:
             all_drugs = all_drugs.filter(
                 Q(surplus_drug__drug__name__icontains=search_text) | Q(client_hospital__name__icontains=search_text))
-        all_drugs = all_drugs.values(
-            'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-            'client_hospital__name', 'safe_id')
         if sort_by == 1:
             all_drugs = all_drugs.order_by('-ordered_count')
         elif sort_by == 2:
             all_drugs = all_drugs.order_by('ordered_count')
         elif sort_by == 3:
-            all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
-        elif sort_by == 4:
             all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
+        elif sort_by == 4:
+            all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
+        all_drugs = all_drugs.values(
+            'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+            'client_hospital__name', 'safe_id')
+        # import ipdb; ipdb.set_trace()
+
+        for drug in all_drugs:
+            drug['surplus_drug__expiration_date'] = "{}/{}".format(drug['surplus_drug__expiration_date'].year,
+                                                                drug['surplus_drug__expiration_date'].month)
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
 
     all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'client_hospital__name', 'safe_id').order_by('-ordered_count')
+        'client_hospital__name', 'safe_id').order_by('surplus_drug__expiration_date')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordertaken.html', context_dict)
 

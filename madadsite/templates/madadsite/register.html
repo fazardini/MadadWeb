@@ -32,6 +32,8 @@
             <input type="text" id="username" class="login_box" placeholder="username" required>
             <p class="input_title">نام بیمارستان</p>
             <input type="text" id="hospital_name" class="login_box" placeholder="نام بیمارستان" required>
+            <p class="input_title">آدرس</p>
+            <input type="text" id="address" class="login_box" placeholder="خیابان ..." required>
             <p class="input_title">شماره تلفن</p>
             <input type="text" id="phone" class="login_box" placeholder="02123456789" required>
             <p class="input_title">شماره موبایل</p>
@@ -77,6 +79,7 @@
           var hospitalName = $("#hospital_name").val();
           var phone = $("#phone").val();
           var mobile = $("#mobile").val();
+          var address = $("#address").val();
           var password = $("#psw").val();
           var passwordRepeat = $("#psw_repeat").val();
           var phoneno = /^[0][9][0-9]{9}$/;
@@ -104,6 +107,7 @@
                 username : username,
                 hospital_name : hospitalName,
                 phone : phone,
+                address: address,
                 mobile : mobile,
                 password : password,
                 csrfmiddlewaretoken: csrftoken,

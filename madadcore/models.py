@@ -49,7 +49,7 @@ class SurplusDrug(models.Model):
         unique_together = (('hospital', 'drug'),)
 
     def __str__(self):
-        return "%s - %s" % self.hospital.name % self.drug.name
+        return "{} - {}".format(self.hospital.name ,self.drug.name)
 
 
 class OrderedDrug(models.Model):
@@ -80,4 +80,4 @@ class OrderedDrug(models.Model):
     )
 
     def __str__(self):
-        return "%s - %s" % self.client_hospital.name % self.surplus_drug.hospital.name
+        return "{} - {}".format(self.client_hospital.name, self.surplus_drug.hospital.name)

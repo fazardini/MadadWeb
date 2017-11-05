@@ -166,7 +166,6 @@
                   $(".save-order").click(function(e){
                     var str = this.id;
                     var drugId = str.split("_")[1];
-                    alert(drugId);
                     var count = $("#order_count"+drugId).val();
                     $.ajax({
                       url : "/save-order/", 

@@ -113,15 +113,14 @@ def ordered_drugs(request, safe_id):
         if search_text:
             all_drugs = all_drugs.filter(
                 Q(surplus_drug__drug__name__icontains=search_text) | Q(surplus_drug__hospital__name__icontains=search_text))
-        # import ipdb; ipdb.set_trace()
         if sort_by == 1:
-            all_drugs = all_drugs.order_by('-ordered_count')
-        elif sort_by == 2:
-            all_drugs = all_drugs.order_by('ordered_count')
-        elif sort_by == 3:
-            all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
-        elif sort_by == 4:
             all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
+        elif sort_by == 2:
+            all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
+        if sort_by == 3:
+            all_drugs = all_drugs.order_by('-ordered_count')
+        elif sort_by == 4:
+            all_drugs = all_drugs.order_by('ordered_count')
         all_drugs = all_drugs.values(
             'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
             'surplus_drug__hospital__name', 'safe_id')
@@ -147,13 +146,13 @@ def order_token_drugs(request, safe_id):
             all_drugs = all_drugs.filter(
                 Q(surplus_drug__drug__name__icontains=search_text) | Q(client_hospital__name__icontains=search_text))
         if sort_by == 1:
-            all_drugs = all_drugs.order_by('-ordered_count')
-        elif sort_by == 2:
-            all_drugs = all_drugs.order_by('ordered_count')
-        elif sort_by == 3:
             all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
-        elif sort_by == 4:
+        elif sort_by == 2:
             all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
+        elif sort_by == 3:
+            all_drugs = all_drugs.order_by('-ordered_count')
+        elif sort_by == 4:
+            all_drugs = all_drugs.order_by('ordered_count')
         all_drugs = all_drugs.values(
             'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
             'client_hospital__name', 'safe_id')

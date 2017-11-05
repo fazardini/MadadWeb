@@ -4,7 +4,7 @@ from django.urls import reverse
 from madadcore.models import Hospital, Drug, SurplusDrug, OrderedDrug
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
-from secrets import token_hex
+from madadcore.helpers.mysecrets import token_hex
 from datetime import date
 from django.db.models import Sum, Q
 import calendar

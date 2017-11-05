@@ -1,6 +1,6 @@
 import csv
 import os
-from secrets import token_hex
+from madadcore.helpers.mysecrets import token_hex
 
 
 def csv_to_dict():

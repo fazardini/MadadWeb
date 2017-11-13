@@ -14,7 +14,7 @@
   font-style:normal;
   font-weight:normal;
 }
-html {
+html, a{
     font-family: 'Samim';
     direction: rtl;
 }
@@ -197,4 +197,9 @@ input:-webkit-autofill, input:-webkit-autofill:hover{
     background-color: #f7f7f7 !important;
     background-image: none;
     color: #a9b0c6 !important;
+}
+.link a{
+    text-decoration: none;
+    float: right;
+    padding: 10px 10px 20px;
 }

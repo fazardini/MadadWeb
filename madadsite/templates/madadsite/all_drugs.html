@@ -178,10 +178,11 @@
                       },
                       success : function(json) {
                         if(json.done)
-                          alert(json.done);
+                          alert('ثبت درخواست با موفقیت انجام شد');
                         if (json.not_exist) {
-                          alert("False");
+                          alert("ثبت درخواست با شکست مواجه شد");
                         }
+                        location.reload();
                       },
                       error : function(xhr,errmsg,err) {
                         alert("عملیات با مشکل مواجه شد.");
@@ -258,9 +259,9 @@
                               },
                               success : function(json) {
                                 if(json.done)
-                                  alert(json.done);
+                                  alert('عملیات با موفقیت انجام شد');
                                 if (json.not_exist) {
-                                  alert("False");
+                                  alert("عملیات با شکست مواجه شد");
                                 }
                               },
                               error : function(xhr,errmsg,err) {

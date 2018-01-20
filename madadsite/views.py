@@ -91,14 +91,15 @@ def my_drugs(request, safe_id):
                 done = True
             except Exception as e:
                 err = e
+                safe_id = False
                 done = False
-            response_dict = {'access': True, 'done': done}
+            response_dict = {'access': True, 'done': done, 'safe_id': safe_id}
         else:
             response_dict = {'access': False}
         return JsonResponse(response_dict)
     if access:
-        surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('drug__name', 'expiration_date',
-                                                                            'current_count')
+        surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).values('safe_id','drug__name', 'expiration_date',
+                                                                             'current_count','ordered__state')
         context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
@@ -251,4 +252,23 @@ def save_order(request):
             response_dict = {'not_exist': True}
     except Exception as e:
         err = e
+    return JsonResponse(response_dict)
+
+
+def delete_my_drugs(request):
+    drug_id = request.POST.get('drug_id')
+    surplus_drug = SurplusDrug.objects.filter(safe_id=drug_id).first()
+    response_dict = {}
+    try:
+        # if surplus_drug.ordered:
+        #     if surplus_drug.ordered.state != 2:
+        #         surplus_drug.delete()
+        #     else:
+        #         response_dict['done'] = False
+        # else:
+        surplus_drug.delete()
+        response_dict['done'] = True
+    except Exception as e:
+        err = e
+        response_dict['done'] = False
     return JsonResponse(response_dict)

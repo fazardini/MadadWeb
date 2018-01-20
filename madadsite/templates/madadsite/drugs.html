@@ -67,14 +67,25 @@
               <th>نام</th>
               <th>تاریخ انقضا</th>
               <th>تعداد مازاد</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="all_drugs">
             {% for item in surplus_drugs %}
-              <tr>
-                <td>{{item.drug__name}}</td>
-                <td>{{item.expiration_date.year}}/{{item.expiration_date.month}}</td>
-                <td>{{item.current_count}}</td>
+              <tr data-item-id={{item.safe_id}}>
+                <td><span class="drug-name">{{item.drug__name}}<span></td>
+                <td><span class="drug-year">{{item.expiration_date.year}}</span><input value="{{item.expiration_date.month}}" class="hiden inp-drug-month">/<span class="drug-month">{{item.expiration_date.month}}</span><input value="{{item.expiration_date.year}}" class="hiden inp-drug-year"></td>
+                <td><span class="drug-count">{{item.current_count}}</span><input value="{{item.current_count}}" class="hiden inp-drug-count"></td>
+                <td>
+                  {% ifnotequal item.ordered__state 2 %}
+                    <!-- <span class="glyphicon glyphicon-edit td-icon edit"></span> -->
+                    <span class="glyphicon glyphicon-trash td-icon del"></span>
+                    <span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span>
+                    <!-- <span class="glyphicon glyphicon-ok-circle td-icon hiden savedit"></span> -->
+                    <span class="glyphicon glyphicon-ok-circle td-icon hiden savedel"></span>
+                  {% endifnotequal %}
+                  
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -147,9 +158,13 @@
                 csrfmiddlewaretoken: csrftoken,
               },
               success : function(json) {
-                  // alert(json.done);
+                $("#drug_name").val('');
+                $("#drug_count").val('');
+                $("#drug_month").val('');
+                $("#drug_year").val('');
+                $("#remove_drug").hide();
                 if (json.done) {
-                  $("#all_drugs").prepend('<tr><td>'+drugName+'</td><td> '+drugYear+'/'+drugMonth+'</td><td>'+drugCount+'</td></tr>');
+                  $("#all_drugs").prepend('<tr data-item-id='+json.safe_id+'><td>'+drugName+'</td><td> '+drugYear+'/'+drugMonth+'</td><td>'+drugCount+'</td><td><span class="glyphicon glyphicon-trash td-icon del"></span><span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden savedel"></span></td></tr>');
                   alert("دارو با موفقیت ثبت شد!");
                 }
                 else{
@@ -158,6 +173,59 @@
                 if(!json.access){
                   alert("دسترسی غیرمجاز!");
                 }
+                        $(".del").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.cansel').show();
+          thisDrug.find('.savedel').show();
+          thisDrug.find('.edit').hide();
+          $(this).hide();
+        });
+        $(".cansel").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.edit').show();
+          thisDrug.find('.del').show();
+          thisDrug.find('.savedel').hide();
+          thisDrug.find('.savedit').hide();
+          thisDrug.find('.drug-year').show();
+          thisDrug.find('.drug-month').show();
+          thisDrug.find('.drug-count').show();
+          thisDrug.find('.inp-drug-year').hide();
+          thisDrug.find('.inp-drug-month').hide();
+          thisDrug.find('.inp-drug-count').hide();
+          $(this).hide();
+        });
+        $(".savedel").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          var drugId = thisDrug.attr('data-item-id');
+          $.ajax({
+            url : "/drugs/delete/", 
+            type : "POST",
+            dataType: "json", 
+            data : {
+              drug_id : drugId,
+              csrfmiddlewaretoken: csrftoken,
+            },
+            success : function(json) {
+              if (json.done) {
+                thisDrug.remove();
+                alert("دارو با موفقیت حذف شد!");
+              }
+              else{
+                alert("ثبت دارو با شکست مواجه شد");
+                thisDrug.find('.edit').show();
+                thisDrug.find('.del').show();
+                thisDrug.find('.savedel').hide();
+                thisDrug.find('.savedit').hide();
+                $(this).hide();
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              alert("ثبت بیمارستان با مشکل مواجه شد.");
+            }
+          });
+          return false;
+        });
               },
               error : function(xhr,errmsg,err) {
                   alert("ثبت بیمارستان با مشکل مواجه شد.");
@@ -165,6 +233,104 @@
           });
           return false;
         });
+        // $(".edit").click(function(e){
+        //   var thisDrug = $(this).closest('tr');
+        //   thisDrug.find('.drug-year').hide();
+        //   thisDrug.find('.drug-month').hide();
+        //   thisDrug.find('.drug-count').hide();
+        //   thisDrug.find('.inp-drug-year').show();
+        //   thisDrug.find('.inp-drug-month').show();
+        //   thisDrug.find('.inp-drug-count').show();
+        //   thisDrug.find('.cansel').show();
+        //   thisDrug.find('.savedit').show();
+        //   thisDrug.find('.del').hide();
+        //   $(this).hide();
+        // });
+        $(".del").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.cansel').show();
+          thisDrug.find('.savedel').show();
+          thisDrug.find('.edit').hide();
+          $(this).hide();
+        });
+        $(".cansel").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.edit').show();
+          thisDrug.find('.del').show();
+          thisDrug.find('.savedel').hide();
+          thisDrug.find('.savedit').hide();
+          thisDrug.find('.drug-year').show();
+          thisDrug.find('.drug-month').show();
+          thisDrug.find('.drug-count').show();
+          thisDrug.find('.inp-drug-year').hide();
+          thisDrug.find('.inp-drug-month').hide();
+          thisDrug.find('.inp-drug-count').hide();
+          $(this).hide();
+        });
+        $(".savedel").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          var drugId = thisDrug.attr('data-item-id');
+          $.ajax({
+            url : "/drugs/delete/", 
+            type : "POST",
+            dataType: "json", 
+            data : {
+              drug_id : drugId,
+              csrfmiddlewaretoken: csrftoken,
+            },
+            success : function(json) {
+              if (json.done) {
+                thisDrug.remove();
+                alert("دارو با موفقیت حذف شد!");
+              }
+              else{
+                alert("ثبت دارو با شکست مواجه شد");
+                thisDrug.find('.edit').show();
+                thisDrug.find('.del').show();
+                thisDrug.find('.savedel').hide();
+                thisDrug.find('.savedit').hide();
+                $(this).hide();
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              alert("ثبت بیمارستان با مشکل مواجه شد.");
+            }
+          });
+          return false;
+        });
+        // $(".savedit").click(function(e){
+        //   var thisDrug = $(this).closest('tr');
+        //   var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+        //   var drugId = thisDrug.attr('data-item-id');
+        //   $.ajax({
+        //     url : "/drugs/delete/", 
+        //     type : "POST",
+        //     dataType: "json", 
+        //     data : {
+        //       drug_id : drugId,
+        //       csrfmiddlewaretoken: csrftoken,
+        //     },
+        //     success : function(json) {
+        //       if (json.done) {
+        //         thisDrug.remove();
+        //         alert("دارو با موفقیت حذف شد!");
+        //       }
+        //       else{
+        //         alert("ثبت دارو با شکست مواجه شد");
+        //         thisDrug.find('.edit').show();
+        //         thisDrug.find('.del').show();
+        //         thisDrug.find('.savedel').hide();
+        //         thisDrug.find('.savedit').hide();
+        //         $(this).hide();
+        //       }
+        //     },
+        //     error : function(xhr,errmsg,err) {
+        //       alert("ثبت بیمارستان با مشکل مواجه شد.");
+        //     }
+        //   });
+        //   return false;
+        // });
       });
     </script>
     {% endblock %}  

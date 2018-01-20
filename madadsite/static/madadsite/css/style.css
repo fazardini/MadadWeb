@@ -121,3 +121,16 @@ td.save-order div, div.drug-hospital{
 .search-box .glyphicon-search{
     font-size: 23px;
 }
+.td-icon{
+    cursor: pointer;
+    font-size: 20px;
+}
+.glyphicon-trash.td-icon{
+    margin-right: 5px;
+}
+.hiden{
+    display: none;
+}
+.inp-drug-year, .inp-drug-month, .inp-drug-count{
+    width: 55px;
+}

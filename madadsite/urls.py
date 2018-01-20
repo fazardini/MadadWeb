@@ -8,6 +8,9 @@ urlpatterns = [
 
     #  daroohaye mazad in bomarestan
     url(r'^drugs/(?P<safe_id>[0-9a-f]{16})/$', my_drugs,  name='my_drugs'),
+    
+    #  hazfe daroohaye mazad in bomarestan
+    url(r'^drugs/delete/', delete_my_drugs, name='delete_my_drugs'),
 
     # daroohaie ke in bimarestan sefaresh dade
     url(r'^ordered-drugs/(?P<safe_id>[0-9a-f]{16})/$', ordered_drugs,  name='ordered_drugs'),
@@ -32,4 +35,5 @@ urlpatterns = [
 
     # taghire state darooye sefaresh dade shode
     url(r'^save-order/', save_order, name='save_order'),
+
 ]

@@ -17,11 +17,13 @@
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
-      <div class="col-lg-4 col-md-4 col-sm-4 right-part">
+      <h1>داروهای سفارش داده شده</h1>
+      <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+      <div class="col-lg-10 col-md-10 col-sm-10 right-part">
         <h3>فیلترها</h3>
         <div class="row top-10">
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-              <div class="search-box col-lg-10 col-md-10 col-sm-10 col-xs-10">
+              <div class="search-box col-lg-4 col-md-4 col-sm-4 col-xs-4">
                 <div class="input-group">
                     <input type="text" id="search_text" placeholder="نام دارو یا بیمارستان" />
                     <span class="input-group-btn">
@@ -31,23 +33,20 @@
                     </span>
                 </div>
             </div>
-          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-        </div>
-        <div class="row top-10">
-          <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">مرتب سازی</label>
-          <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="sort" required>
-            <option value="1">زودترین انقضا</option>
-            <option value="2">دیرترین انقضا</option>
-            <option value="3">بیشترین تعداد مازاد</option>
-            <option value="4">کمترین تعداد مازاد</option>
-          </select>
+            <label class="col-lg-2 col-md-2 col-sm-2 col-xs-2 text-left">مرتب سازی</label>
+            <select class="col-lg-4 col-md-4 col-sm-4 col-xs-4" id="sort" required>
+              <option value="1">زودترین انقضا</option>
+              <option value="2">دیرترین انقضا</option>
+              <option value="3">بیشترین تعداد مازاد</option>
+              <option value="4">کمترین تعداد مازاد</option>
+            </select>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
         <input type="text" class="d-none" id="hospital_id" value="{{ safe_id }}">
       </div>
-
-      <div class="col-lg-8 col-md-8 col-sm-8 left-part">
-        <h1>داروهای سفارش داده شده</h1>
+    </div>
+    <div class="row my-drugs">
+      <div class="col-lg-12 col-md-12 col-sm-12 left-part">
           <table class="table table-bordered table-striped">
             <thead>
               <tr>
@@ -55,17 +54,27 @@
                 <th>تاریخ انقضا</th>
                 <th>نام بیمارستان</th>
                 <th>تعداد سفارش</th>
-                <!-- <th>وضعیت</th> -->
+                <th>وضعیت</th>
               </tr>
             </thead>
             <tbody id="all_drugs">
               {% for item in drugs %}
-                <tr>
+                <tr data-item-id="{{item.safe_id}}">
                   <td>{{item.surplus_drug__drug__name}}</td>
                   <td>{{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</td>
                   <td>{{item.surplus_drug__hospital__name}}</td>
                   <td>{{item.ordered_count}}</td>
-                  <!-- <td></td> -->
+                  <td>
+                    {% if item.state == 1 %}
+                      <span class="change-state">تایید دریافت</span>
+                      <span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span>
+                      <span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>
+                    {% elif item.state == 0 %}
+                      درحال بررسی
+                    {% else %}
+                      دریافت شده
+                    {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -77,6 +86,51 @@
       $(document).ready(function(){
         $("#sort").change(function () {
           $("#search").trigger( "click" ); 
+        });
+        $(".change-state").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.cansel').show();
+          thisDrug.find('.save-state').show();
+          $(this).hide();
+        });
+
+        $(".cansel").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.change-state').show();
+          thisDrug.find('.save-state').hide();
+          $(this).hide();
+        });
+
+        $(".save-state").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          var thisTd = $(this).closest('td');
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          var itemId = thisDrug.attr('data-item-id');
+          $.ajax({
+            url : "/change-order-state/", 
+            type : "POST",
+            dataType: "json", 
+            data : {
+              item_id : itemId,
+              state : 2,
+              csrfmiddlewaretoken: csrftoken,
+            },
+            success : function(json) {
+              if (json.done) {
+                thisTd.html('دریافت شده');
+              }
+              else{
+                alert("عملیات شکست مواجه شد");
+                thisDrug.find('.change-state').show();
+                thisDrug.find('.cansel').hide();
+                $(this).hide();
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              alert("عملیات با مشکل مواجه شد.");
+            }
+          });
+          return false;
         });
         $("#search").click(function(e){
           e.defaultPrevented;
@@ -98,9 +152,64 @@
               var drugs = json.drugs;
               if(drugs){
                 for(i in drugs){
-                  $("#all_drugs").append('<tr><td>'+drugs[i]['surplus_drug__drug__name']+'</td><td>'+drugs[i]['surplus_drug__expiration_date']+'</td><td>'+drugs[i]['surplus_drug__hospital__name']+'</td><td>'+drugs[i]['ordered_count']+'</td></tr>');
+                  var state = '';
+                  if (drugs[i]['state']==1){
+                    state = '<span class="change-state">تایید دریافت</span><span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>';
+                  }
+                  else if (drugs[i]['state']==0){
+                      state = 'درحال بررسی';
+                    }
+                    else{
+                      state = 'دریافت شده';
+                    }
+                  $("#all_drugs").append('<tr data-item-id="'+drugs[i]['safe_id']+'"><td>'+drugs[i]['surplus_drug__drug__name']+'</td><td>'+drugs[i]['surplus_drug__expiration_date']+'</td><td>'+drugs[i]['surplus_drug__hospital__name']+'</td><td>'+drugs[i]['ordered_count']+'</td><td>'+state+'</td></tr>');
                 }
               }
+        $(".change-state").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.cansel').show();
+          thisDrug.find('.save-state').show();
+          $(this).hide();
+        });
+
+        $(".cansel").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          thisDrug.find('.change-state').show();
+          thisDrug.find('.save-state').hide();
+          $(this).hide();
+        });
+
+        $(".save-state").click(function(e){
+          var thisDrug = $(this).closest('tr');
+          var thisTd = $(this).closest('td');
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          var itemId = thisDrug.attr('data-item-id');
+          $.ajax({
+            url : "/change-order-state/", 
+            type : "POST",
+            dataType: "json", 
+            data : {
+              item_id : itemId,
+              state : 2,
+              csrfmiddlewaretoken: csrftoken,
+            },
+            success : function(json) {
+              if (json.done) {
+                thisTd.html('دریافت شده');
+              }
+              else{
+                alert("عملیات شکست مواجه شد");
+                thisDrug.find('.change-state').show();
+                thisDrug.find('.cansel').hide();
+                $(this).hide();
+              }
+            },
+            error : function(xhr,errmsg,err) {
+              alert("عملیات با مشکل مواجه شد.");
+            }
+          });
+          return false;
+        });
             },
             error : function(xhr,errmsg,err) {
               alert("عملیات با مشکل مواجه شد.");

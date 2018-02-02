@@ -115,7 +115,7 @@ td.save-order div, div.drug-hospital{
     border: 0;
     box-shadow: none;
     background: none;
-    color: color: #666666;
+    color: #666666;
 }
 
 .search-box .glyphicon-search{
@@ -133,4 +133,18 @@ td.save-order div, div.drug-hospital{
 }
 .inp-drug-year, .inp-drug-month, .inp-drug-count{
     width: 55px;
+}
+.change-state{
+    color: #ffffff;
+    background: #393939;
+    border-radius: 5px;
+    text-align: center;
+    padding: 0px 5px 4px;
+    cursor: pointer;
+}
+.my-drugs h1{
+    margin-top: 0 !important;
+}
+.my-drugs{
+    margin-bottom: 10px;
 }

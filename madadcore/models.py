@@ -31,6 +31,7 @@ class SurplusDrug(models.Model):
     safe_id = models.CharField(max_length=16, null=False, unique=True)
     current_count = models.IntegerField(default=0)
     initial_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
     expiration_date = models.DateField(auto_now=False)
     hospital = models.ForeignKey(
         Hospital,
@@ -65,6 +66,9 @@ class OrderedDrug(models.Model):
 
     state = models.SmallIntegerField(default=0, choices=MODE_CHOICES)
     safe_id = models.CharField(max_length=16, null=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(auto_now=True)
+    delivered_at = models.DateTimeField(auto_now=True)
     ordered_count = models.IntegerField()
     client_hospital = models.ForeignKey(
         Hospital,

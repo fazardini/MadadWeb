@@ -173,7 +173,7 @@
                 if(!json.access){
                   alert("دسترسی غیرمجاز!");
                 }
-                        $(".del").click(function(e){
+        $(".del").click(function(e){
           var thisDrug = $(this).closest('tr');
           thisDrug.find('.cansel').show();
           thisDrug.find('.savedel').show();
@@ -212,7 +212,7 @@
                 alert("دارو با موفقیت حذف شد!");
               }
               else{
-                alert("ثبت دارو با شکست مواجه شد");
+                alert("عملیات با شکست مواجه شد");
                 thisDrug.find('.edit').show();
                 thisDrug.find('.del').show();
                 thisDrug.find('.savedel').hide();
@@ -221,7 +221,7 @@
               }
             },
             error : function(xhr,errmsg,err) {
-              alert("ثبت بیمارستان با مشکل مواجه شد.");
+              alert("عملیات با مشکل مواجه شد.");
             }
           });
           return false;
@@ -285,7 +285,7 @@
                 alert("دارو با موفقیت حذف شد!");
               }
               else{
-                alert("ثبت دارو با شکست مواجه شد");
+                alert("عملیات با شکست مواجه شد");
                 thisDrug.find('.edit').show();
                 thisDrug.find('.del').show();
                 thisDrug.find('.savedel').hide();
@@ -294,7 +294,7 @@
               }
             },
             error : function(xhr,errmsg,err) {
-              alert("ثبت بیمارستان با مشکل مواجه شد.");
+              alert("عملیات با مشکل مواجه شد.");
             }
           });
           return false;

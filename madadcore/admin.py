@@ -16,7 +16,7 @@ class SurplusDrugAdmin(admin.ModelAdmin):
 
 
 class OrderedDrugAdmin(admin.ModelAdmin):
-    list_display = ('safe_id', 'ordered_count', 'client_hospital', 'surplus_drug')
+    list_display = ('safe_id', 'ordered_count', 'client_hospital', 'surplus_drug', 'state')
 
 
 admin.site.register(Hospital, HospitalAdmin)

@@ -5,7 +5,7 @@ from madadcore.models import Hospital, Drug, SurplusDrug, OrderedDrug
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from madadcore.helpers.mysecrets import token_hex
-from datetime import date
+from datetime import date, timezone
 from django.db.models import Sum, Q
 import calendar
 import json
@@ -124,7 +124,7 @@ def ordered_drugs(request, safe_id):
             all_drugs = all_drugs.order_by('ordered_count')
         all_drugs = all_drugs.values(
             'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-            'surplus_drug__hospital__name', 'safe_id')
+            'surplus_drug__hospital__name', 'safe_id', 'state')
 
         for drug in all_drugs:
             drug['surplus_drug__expiration_date'] = "{}/{}".format(drug['surplus_drug__expiration_date'].year, drug['surplus_drug__expiration_date'].month)
@@ -133,7 +133,7 @@ def ordered_drugs(request, safe_id):
 
     ordered_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'surplus_drug__hospital__name', 'safe_id').order_by('surplus_drug__expiration_date')
+        'surplus_drug__hospital__name', 'safe_id', 'state').order_by('surplus_drug__expiration_date')
     context_dict = {'drugs': list(ordered_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordered.html', context_dict)
 
@@ -156,7 +156,7 @@ def order_token_drugs(request, safe_id):
             all_drugs = all_drugs.order_by('ordered_count')
         all_drugs = all_drugs.values(
             'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-            'client_hospital__name', 'safe_id')
+            'client_hospital__name', 'safe_id', 'state')
         # import ipdb; ipdb.set_trace()
 
         for drug in all_drugs:
@@ -167,7 +167,7 @@ def order_token_drugs(request, safe_id):
 
     all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'client_hospital__name', 'safe_id').order_by('surplus_drug__expiration_date')
+        'client_hospital__name', 'safe_id', 'state').order_by('surplus_drug__expiration_date')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordertaken.html', context_dict)
 
@@ -187,7 +187,7 @@ def all_drugs(request):
     if request.method == 'POST':
         search_text = request.POST.get('search_text')
         sort_by = int(request.POST.get('sorted_by', 0))
-        all_drugs = SurplusDrug.objects.all().values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
+        all_drugs = SurplusDrug.objects.all().exclude(current_count=0).values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
         if search_text:
             all_drugs = all_drugs.filter(
                 Q(drug__name__icontains=search_text) | Q(drug__name__icontains=search_text)).values(
@@ -198,7 +198,7 @@ def all_drugs(request):
             all_drugs = all_drugs.order_by('sum_count')
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
-    all_drugs = SurplusDrug.objects.all().distinct().values(
+    all_drugs = SurplusDrug.objects.all().exclude(current_count=0).distinct().values(
         'drug__name', 'drug__safe_id').annotate(
         sum_count=Sum('current_count')).order_by('-sum_count')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
@@ -223,13 +223,28 @@ def drugs_name(request):
 
 
 def change_order_state(request):
-    return 1
+    safe_id = request.POST.get('item_id')
+    state = request.POST.get('state', 0)
+    orderd_drug = OrderedDrug.objects.filter(safe_id=safe_id).first()
+    response_dict = {}
+    try:
+        orderd_drug.state = state
+        if state == 1:
+            orderd_drug.sent_at = timezone.now
+        elif state == 2:
+            orderd_drug.delivered_at = timezone.now
+        orderd_drug.save()
+        response_dict['done'] = True
+    except Exception as e:
+        err = e
+        response_dict['done'] = False
+    return JsonResponse(response_dict)
 
 
 def hospitals_drug(request):
     drug_id = request.POST.get('drug_id')
     drun_name = Drug.objects.filter(safe_id=drug_id).first().name
-    hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).values(
+    hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).exclude(current_count=0).values(
         'hospital__name', 'expiration_date', 'current_count', 'safe_id')
 
     return JsonResponse({'hospitals': list(hospitals), 'drun_name': drun_name})

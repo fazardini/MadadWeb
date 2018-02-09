@@ -102,7 +102,7 @@ def my_drugs(request, safe_id):
         surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).exclude(current_count=0).distinct().values(
             'safe_id', 'drug__name', 'expiration_date', 'current_count')
         for drug in surplus_drugs:
-            drug['ordered'] = OrderedDrug.objects.filter(surplus_drug__safe_id=drug['safe_id']).exists()
+            drug['ordered'] = not OrderedDrug.objects.filter(surplus_drug__safe_id=drug['safe_id']).exists()
         context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:

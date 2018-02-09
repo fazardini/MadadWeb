@@ -150,3 +150,32 @@ td.save-order div, div.drug-hospital{
 .my-drugs{
     margin-bottom: 10px;
 }
+a{
+    text-decoration: none;
+}
+.create-excel{
+    color: #32008d;
+    background: #ffffff;
+    border-radius: 5px;
+    text-align: center;
+    padding: 0px 5px 4px;
+    cursor: pointer;
+    border: 2px solid;
+    font-weight: bold;
+    float: left;
+    margin-top: 10px;
+    text-decoration: none;
+}
+.create-excel:focus{
+    text-decoration: none;
+    color: #32008d;
+    background: #ffffff;
+}
+.create-excel:hover{
+    text-decoration: none;
+    color: #ffffff;
+    background: #32008d;
+}
+.display-inline{
+    display: inline-block;
+}

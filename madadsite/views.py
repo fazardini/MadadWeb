@@ -9,6 +9,7 @@ from datetime import date, timezone
 from django.db.models import Sum, Q
 import calendar
 import json
+import xlwt
 
 
 def register(request):
@@ -287,3 +288,36 @@ def delete_my_drugs(request):
         err = e
         response_dict['done'] = False
     return JsonResponse(response_dict)
+
+
+def create_all_drugs_excel(request):
+    search_text = request.GET.get('search_text', '')
+    sort_by = int(request.GET.get('sorted_by', 1))
+    all_drugs = SurplusDrug.objects.all().exclude(current_count=0)
+    if search_text:
+        all_drugs = all_drugs.filter(
+            Q(drug__name__icontains=search_text) | Q(drug__name__icontains=search_text))
+    if sort_by == 1:
+        all_drugs = all_drugs.order_by('-current_count')
+    elif sort_by == 2:
+        all_drugs = all_drugs.order_by('current_count')
+    all_drugs = all_drugs.values('drug__name', 'current_count', 'expiration_date', 'hospital__name')
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="Drugs.xls"'
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('همه داروهای مازاد')
+
+    row_num = 0
+    columns = ['نام دارو', 'نام بیمارستان', 'تعداد مازاد', 'تاریخ انقضا']
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num])
+    for drug in all_drugs:
+        row_num += 1
+        expiration_date = '{}/{}/{}'.format(drug['expiration_date'].year, drug['expiration_date'].month, drug['expiration_date'].day)
+        result_list = [drug['drug__name'], drug['hospital__name'],
+                       drug['current_count'], expiration_date]
+
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, result_list[col_num])
+    wb.save(response)
+    return response

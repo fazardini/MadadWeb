@@ -36,4 +36,6 @@ urlpatterns = [
     # taghire state darooye sefaresh dade shode
     url(r'^save-order/', save_order, name='save_order'),
 
+    # ijade file excel hame daroo ha
+    url(r'^create-drugs-excel/', create_all_drugs_excel, name='create_all_drugs_excel'),
 ]

@@ -278,7 +278,8 @@ def delete_my_drugs(request):
     surplus_drug = SurplusDrug.objects.filter(safe_id=drug_id).first()
     response_dict = {}
     try:
-        if surplus_drug.ordered:
+        ordered = OrderedDrug.objects.filter(surplus_drug__safe_id=surplus_drug.safe_id).exists()
+        if ordered:
             # if surplus_drug.ordered.state != 2:
             #     surplus_drug.delete()
             # else:

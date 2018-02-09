@@ -324,3 +324,80 @@ def create_all_drugs_excel(request):
             ws.write(row_num, col_num, result_list[col_num])
     wb.save(response)
     return response
+
+
+def exchange_drugs(request):
+    # if request.method == 'POST':
+    #     search_text = request.POST.get('search_text')
+    #     sort_by = int(request.POST.get('sorted_by', 0))
+    #     all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id)
+    #     if search_text:
+    #         all_drugs = all_drugs.filter(
+    #             Q(surplus_drug__drug__name__icontains=search_text) | Q(client_hospital__name__icontains=search_text))
+    #     if sort_by == 1:
+    #         all_drugs = all_drugs.order_by('surplus_drug__expiration_date')
+    #     elif sort_by == 2:
+    #         all_drugs = all_drugs.order_by('-surplus_drug__expiration_date')
+    #     elif sort_by == 3:
+    #         all_drugs = all_drugs.order_by('-ordered_count')
+    #     elif sort_by == 4:
+    #         all_drugs = all_drugs.order_by('ordered_count')
+    #     all_drugs = all_drugs.values(
+    #         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
+    #         'client_hospital__name', 'safe_id', 'state')
+    #
+    #     for drug in all_drugs:
+    #         drug['surplus_drug__expiration_date'] = "{}/{}".format(drug['surplus_drug__expiration_date'].year,
+    #                                                             drug['surplus_drug__expiration_date'].month)
+    #     response_dict = {'drugs': list(all_drugs)}
+    #     return JsonResponse(response_dict)
+    if request.user.is_staff:
+        all_drugs = OrderedDrug.objects.all().values(
+            'surplus_drug__drug__name', 'surplus_drug__hospital__name', 'ordered_count', 'surplus_drug__expiration_date',
+            'client_hospital__name', 'safe_id', 'state').order_by('surplus_drug__expiration_date')
+        context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
+        return render(request, 'madadsite/exchange_drugs.html', context_dict)
+    context_dict = {'err_access': True, 'safe_id': request.user.hospital.safe_id}
+    return render(request, 'madadsite/exchange_drugs.html', context_dict)
+
+
+def create_exchange_drugs_excel(request):
+    if request.user.is_staff:
+        all_drugs = OrderedDrug.objects.all()
+
+        all_drugs = all_drugs.values('surplus_drug__drug__name',
+                                     'surplus_drug__hospital__name',
+                                     'ordered_count',
+                                     'surplus_drug__expiration_date',
+                                     'client_hospital__name', 'state')
+        response = HttpResponse(content_type='application/ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="ExchangeDrugs.xls"'
+        wb = xlwt.Workbook(encoding='utf-8')
+        ws = wb.add_sheet('داروهای مبادله شده')
+
+        row_num = 0
+        columns = ['سفارش دهنده', 'سفارش گیرنده', 'نام دارو', 'تعداد سفارش', 'تاریخ انقضا', 'وضعیت']
+        for col_num in range(len(columns)):
+            ws.write(row_num, col_num, columns[col_num])
+        for drug in all_drugs:
+            row_num += 1
+            expiration_date = '{}/{}/{}'.format(drug['surplus_drug__expiration_date'].year,
+                                                drug['surplus_drug__expiration_date'].month,
+                                                drug['surplus_drug__expiration_date'].day)
+            if drug['state'] == 0:
+                state = 'درحال بررسی'
+            elif drug['state'] == 1:
+                state = 'ارسال شده'
+            else:
+                state = 'تحویل داده شده'
+
+            result_list = [drug['client_hospital__name'], drug['surplus_drug__hospital__name'],
+                           drug['surplus_drug__drug__name'],
+                           drug['ordered_count'],
+                           expiration_date,
+                           state]
+
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, result_list[col_num])
+        wb.save(response)
+        return response

@@ -38,4 +38,9 @@ urlpatterns = [
 
     # ijade file excel hame daroo ha
     url(r'^create-drugs-excel/', create_all_drugs_excel, name='create_all_drugs_excel'),
+
+    url(r'^exchange-drugs/', exchange_drugs, name='exchange_drugs'),
+
+    # ijade file excel tabadole daroo ha
+    url(r'^exchange-drugs-excel/', create_exchange_drugs_excel, name='create_exchange_drugs_excel'),
 ]

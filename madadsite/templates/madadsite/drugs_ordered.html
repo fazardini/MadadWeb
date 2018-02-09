@@ -12,6 +12,9 @@
     <li class="active"><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
     <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
     <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
+    {% if request.user.is_staff %}
+      <li><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>
+    {% endif %}
 {% endblock %}
 
 {% block content %}{% csrf_token %}

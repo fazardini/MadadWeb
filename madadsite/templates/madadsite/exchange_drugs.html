@@ -10,18 +10,22 @@
     <li><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
     <li><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
     <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
-    <li class="active"><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
     <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
     {% if request.user.is_staff %}
-      <li><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>
+      <li class="active"><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>
     {% endif %}
 {% endblock %}
 
 {% block content %}{% csrf_token %}
+  {% if err_access %}
+    دسترسی غیرمجاز
+  {% else %}
   <div class="container-fluid">
     <div class="row my-drugs">
-      <h1>داروهای سفارش گرفته شده</h1>
-      <div class="col-lg-1 col-md-1 col-sm-1"></div>
+      <h1 class="display-inline">داروهای مبادله شده</h1>
+      <a class="create-excel" href="{% url 'create_exchange_drugs_excel' %}">خروجی اکسل</a>
+<!--       <div class="col-lg-1 col-md-1 col-sm-1"></div>
       <div class="col-lg-10 col-md-10 col-sm-10 right-part">
         <h3>فیلترها</h3>
         <div class="row top-10">
@@ -48,15 +52,16 @@
         <input type="text" class="d-none" id="hospital_id" value="{{ safe_id }}">
       </div>
       <div class="col-lg-1 col-md-1 col-sm-1"></div>
-    </div>
+ -->    </div>
     <div class="row my-drugs">
       <div class="col-lg-12 col-md-12 col-sm-12 left-part">
           <table class="table table-bordered table-striped">
             <thead>
               <tr>
+                <th>سفارش دهنده</th>
+                <th>سفارش گیرنده</th>
                 <th>نام دارو</th>
                 <th>تاریخ انقضا</th>
-                <th>نام بیمارستان سفارش دهنده</th>
                 <th>تعداد سفارش</th>
                 <th>وضعیت</th>
               </tr>
@@ -64,15 +69,14 @@
             <tbody id="all_drugs">
               {% for item in drugs %}
                 <tr data-item-id="{{item.safe_id}}">
+                  <td>{{item.client_hospital__name}}</td>
+                  <td>{{item.surplus_drug__hospital__name}}</td>
                   <td>{{item.surplus_drug__drug__name}}</td>
                   <td>{{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</td>
-                  <td>{{item.client_hospital__name}}</td>
                   <td>{{item.ordered_count}}</td>
                   <td>
                     {% if item.state == 0 %}
-                      <span class="change-state">ارسال</span>
-                      <span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span>
-                      <span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>
+                      درحال بررسی
                     {% elif item.state == 1 %}
                       ارسال شده
                     {% else %}
@@ -224,6 +228,7 @@
         });
       });
     </script>
+    {% endif %}
     {% endblock %}  
   </body>
 </html>

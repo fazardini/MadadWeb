@@ -165,6 +165,7 @@ a{
     float: left;
     margin-top: 10px;
     text-decoration: none;
+    margin-left: 20px;
 }
 .create-excel:focus{
     text-decoration: none;

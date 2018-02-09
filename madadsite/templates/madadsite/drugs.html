@@ -77,13 +77,13 @@
                 <td><span class="drug-year">{{item.expiration_date.year}}</span><input value="{{item.expiration_date.month}}" class="hiden inp-drug-month">/<span class="drug-month">{{item.expiration_date.month}}</span><input value="{{item.expiration_date.year}}" class="hiden inp-drug-year"></td>
                 <td><span class="drug-count">{{item.current_count}}</span><input value="{{item.current_count}}" class="hiden inp-drug-count"></td>
                 <td>
-                  {% ifnotequal item.ordered__state 2 %}
+                  {% if item.ordered %}
                     <!-- <span class="glyphicon glyphicon-edit td-icon edit"></span> -->
                     <span class="glyphicon glyphicon-trash td-icon del"></span>
                     <span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span>
                     <!-- <span class="glyphicon glyphicon-ok-circle td-icon hiden savedit"></span> -->
                     <span class="glyphicon glyphicon-ok-circle td-icon hiden savedel"></span>
-                  {% endifnotequal %}
+                  {% endif %}
                   
                 </td>
               </tr>

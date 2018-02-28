@@ -46,9 +46,6 @@ class SurplusDrug(models.Model):
         related_name='surplus'
     )
 
-    class Meta:
-        unique_together = (('hospital', 'drug'),)
-
     def __str__(self):
         return "{} - {}".format(self.hospital.name ,self.drug.name)
 

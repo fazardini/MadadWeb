@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-# Create your models here.
 
 
 class Hospital(models.Model):
@@ -28,11 +27,34 @@ class Drug(models.Model):
 
 
 class SurplusDrug(models.Model):
+
+    OTHER = 0
+    STAGNANT = 1
+    SURPLUS = 2
+    TYPE_CHOICES = (
+        (OTHER, 'سایر'),
+        (STAGNANT, 'راکد'),
+        (SURPLUS, 'مازاد'),
+    )
+    TYPE_DICT = dict((k, v) for k, v in TYPE_CHOICES)
+    drug_type = models.SmallIntegerField(default=0, choices=TYPE_CHOICES)
+
+    MEDICINE = 1
+    MATERIEL = 2
+    CAT_CHOICES = (
+        (OTHER, 'سایر'),
+        (MEDICINE, 'دارو'),
+        (MATERIEL, 'لوازم'),
+    )
+    CAT_DICT = dict((k, v) for k, v in CAT_CHOICES)
+    cat = models.SmallIntegerField(default=0, choices=CAT_CHOICES)
+
     safe_id = models.CharField(max_length=16, null=False, unique=True)
     current_count = models.IntegerField(default=0)
     initial_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     expiration_date = models.DateField(auto_now=False)
+    price = models.BigIntegerField(default=None, null=True)
     hospital = models.ForeignKey(
         Hospital,
         db_index=True,
@@ -47,17 +69,19 @@ class SurplusDrug(models.Model):
     )
 
     def __str__(self):
-        return "{} - {}".format(self.hospital.name ,self.drug.name)
+        return "{} - {}".format(self.hospital.name, self.drug.name)
 
 
 class OrderedDrug(models.Model):
     PENDING = 0
     SENT = 1
     DELIVERED = 2
+    REJECT = 3
     MODE_CHOICES = (
         (PENDING, 'درحال بررسی'),
         (SENT, 'ارسال شده'),
         (DELIVERED, 'دریافت شده'),
+        (REJECT, 'لغو شده'),
     )
     MODE_DICT = dict((k, v) for k, v in MODE_CHOICES)
 

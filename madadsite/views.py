@@ -11,6 +11,8 @@ import calendar
 import json
 import xlwt
 
+from madadsite.helpers.datetime_helpers import the_today
+
 
 def register(request):
     if request.method == 'POST':
@@ -190,7 +192,10 @@ def all_drugs(request):
     if request.method == 'POST':
         search_text = request.POST.get('search_text')
         sort_by = int(request.POST.get('sorted_by', 0))
-        all_drugs = SurplusDrug.objects.all().exclude(current_count=0).values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
+        all_drugs = SurplusDrug.objects.all().exclude(
+            Q(expiration_date__lt=the_today()) |
+            Q(current_count=0)
+        ).values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
         if search_text:
             all_drugs = all_drugs.filter(
                 Q(drug__name__icontains=search_text) | Q(drug__name__icontains=search_text)).values(
@@ -201,7 +206,8 @@ def all_drugs(request):
             all_drugs = all_drugs.order_by('sum_count')
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
-    all_drugs = SurplusDrug.objects.all().exclude(current_count=0).distinct().values(
+    all_drugs = SurplusDrug.objects.all().exclude(Q(expiration_date__lt=the_today()) |
+                                                  Q(current_count=0)).distinct().values(
         'drug__name', 'drug__safe_id').annotate(
         sum_count=Sum('current_count')).order_by('-sum_count')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}

@@ -31,17 +31,17 @@
           </div>
           <div class="row top-10">
             <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">تعداد</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="تعداد دارو" id="drug_count" required>
+            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="تعداد دارو" id="drug_count" required>
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
           <div class="row top-10">
             <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">ماه انقضا</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="ماه" id="drug_month" required>
+            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="ماه" id="drug_month" required min="1" max="12">
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
           <div class="row top-10">
             <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">سال انقضا</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="سال" id="drug_year" required>
+            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="سال" id="drug_year" required min="2018" max="3000">
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
           <div class="text-left"><button type="submit" id="add_drug" class="margin-10">افزودن دارو</button></div>

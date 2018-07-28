@@ -76,6 +76,8 @@
                       <span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>
                     {% elif item.state == 0 %}
                       درحال بررسی
+                    {% elif item.state == 3 %}
+                      لغو درخواست شده
                     {% else %}
                       دریافت شده
                     {% endif %}
@@ -165,6 +167,8 @@
                   else if (drugs[i]['state']==0){
                       state = 'درحال بررسی';
                     }
+                    else if (drugs[i]['state']==3)
+                        state = 'لغو درخواست شده';
                     else{
                       state = 'دریافت شده';
                     }

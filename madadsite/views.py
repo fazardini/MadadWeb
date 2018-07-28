@@ -228,10 +228,16 @@ def order_token_drugs(request, safe_id):
             all_drugs = all_drugs.order_by('ordered_count')
         all_drugs = all_drugs.values(
             'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-            'client_hospital__name', 'safe_id', 'state')
-        # import ipdb; ipdb.set_trace()
+            'client_hospital__name', 'safe_id', 'state',
+            price=F('surplus_drug__price'))
 
         for drug in all_drugs:
+            if drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=90):
+                drug['exp_state'] = "lte3"
+            elif drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=180):
+                drug['exp_state'] = "lte6"
+            else:
+                drug['exp_state'] = "gt6"
             drug['surplus_drug__expiration_date'] = "{}/{}".format(drug['surplus_drug__expiration_date'].year,
                                                                 drug['surplus_drug__expiration_date'].month)
         response_dict = {'drugs': list(all_drugs)}
@@ -239,7 +245,15 @@ def order_token_drugs(request, safe_id):
 
     all_drugs = OrderedDrug.objects.filter(surplus_drug__hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'client_hospital__name', 'safe_id', 'state').order_by('surplus_drug__expiration_date')
+        'client_hospital__name', 'safe_id', 'state',price=F('surplus_drug__price')
+    ).order_by('surplus_drug__expiration_date')
+    for drug in all_drugs:
+        if drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=90):
+            drug['exp_state'] = "lte3"
+        elif drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=180):
+            drug['exp_state'] = "lte6"
+        else:
+            drug['exp_state'] = "gt6"
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordertaken.html', context_dict)
 

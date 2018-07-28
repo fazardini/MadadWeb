@@ -56,6 +56,7 @@
               <tr>
                 <th>نام دارو</th>
                 <th>تاریخ انقضا</th>
+                <th>قیمت واحد</th>
                 <th>نام بیمارستان سفارش دهنده</th>
                 <th>تعداد سفارش</th>
                 <th>وضعیت</th>
@@ -63,20 +64,24 @@
             </thead>
             <tbody id="all_drugs">
               {% for item in drugs %}
-                <tr data-item-id="{{item.safe_id}}">
+                <tr class="{{ item.exp_state }}" data-item-id="{{item.safe_id}}">
                   <td>{{item.surplus_drug__drug__name}}</td>
                   <td>{{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</td>
+                  <td>{% if item.price %}{{ item.price }}{% else %}-{% endif %}</td>
                   <td>{{item.client_hospital__name}}</td>
                   <td>{{item.ordered_count}}</td>
                   <td>
                     {% if item.state == 0 %}
-                      <span class="change-state">ارسال</span>
+                      <span class="change-state" data-state=1>ارسال</span>
+                      <span class="change-state" data-state=3>لغو</span>
                       <span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span>
                       <span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>
                     {% elif item.state == 1 %}
                       ارسال شده
-                    {% else %}
+                    {% elif item.state == 2 %}
                       تحویل داده شده
+                    {% else %}
+                        لغو درخواست شده
                     {% endif %}
                   </td>
                 </tr>
@@ -94,9 +99,10 @@
 
         $(".change-state").click(function(e){
           var thisDrug = $(this).closest('tr');
+          thisDrug.attr('data-state', $(this).attr('data-state'));
           thisDrug.find('.cansel').show();
           thisDrug.find('.save-state').show();
-          $(this).hide();
+          thisDrug.find('.change-state').hide();
         });
 
         $(".cansel").click(function(e){
@@ -111,18 +117,22 @@
           var thisTd = $(this).closest('td');
           var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
           var itemId = thisDrug.attr('data-item-id');
+          var state = thisDrug.attr('data-state');
           $.ajax({
             url : "/change-order-state/", 
             type : "POST",
             dataType: "json", 
             data : {
               item_id : itemId,
-              state : 1,
+              state : state,
               csrfmiddlewaretoken: csrftoken,
             },
             success : function(json) {
               if (json.done) {
-                thisTd.html('ارسال شده');
+                  if(state==1)
+                    thisTd.html('ارسال شده');
+                  else if(state==3)
+                      thisTd.html('لغو درخواست شده');
               }
               else{
                 alert("عملیات شکست مواجه شد");
@@ -159,23 +169,35 @@
               if(drugs){
                 for(i in drugs){
                   var state = '';
+                  var price = drugs[i]['price'] ? drugs[i]['price'] : '-';
                   if (drugs[i]['state']==0){
-                    state = '<span class="change-state">ارسال</span><span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>';
+                    state = '<span class="change-state" data-state=1>ارسال</span>' +
+                        '<span class="change-state" data-state=3>لغو</span>' +
+                        '<span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>';
                   }
                   else if (drugs[i]['state']==1){
                       state = 'ارسال شده';
                     }
-                    else{
+                    else if (drugs[i]['state']==2){
                       state = 'تحویل داده شده';
                     }
-                  $("#all_drugs").append('<tr data-item-id="'+drugs[i]['safe_id']+'"><td>'+drugs[i]['surplus_drug__drug__name']+'</td><td>'+drugs[i]['surplus_drug__expiration_date']+'</td><<td>'+drugs[i]['client_hospital__name']+'</td><td>'+drugs[i]['ordered_count']+'</td><td>'+state+'</td></tr>');
+                    else
+                        state = 'لغو درخواست شده'
+                  $("#all_drugs").append('<tr class="'+drugs[i]['exp_state']+'" data-item-id="'+drugs[i]['safe_id']+'">' +
+                      '<td>'+drugs[i]['surplus_drug__drug__name']+'</td>' +
+                      '<td>'+drugs[i]['surplus_drug__expiration_date']+'</td>' +
+                      '<td>'+price+'</td>' +
+                      '<td>'+drugs[i]['client_hospital__name']+'</td>' +
+                      '<td>'+drugs[i]['ordered_count']+'</td><td>'+state+'</td>' +
+                      '</tr>');
                 }
               }
         $(".change-state").click(function(e){
           var thisDrug = $(this).closest('tr');
+          thisDrug.attr('data-state', $(this).attr('data-state'));
           thisDrug.find('.cansel').show();
           thisDrug.find('.save-state').show();
-          $(this).hide();
+          thisDrug.find('.change-state').hide();
         });
 
         $(".cansel").click(function(e){
@@ -190,18 +212,22 @@
           var thisTd = $(this).closest('td');
           var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
           var itemId = thisDrug.attr('data-item-id');
+          var state = thisDrug.attr('data-state');
           $.ajax({
             url : "/change-order-state/", 
             type : "POST",
             dataType: "json", 
             data : {
               item_id : itemId,
-              state : 1,
+              state : state,
               csrfmiddlewaretoken: csrftoken,
             },
             success : function(json) {
               if (json.done) {
-                thisTd.html('ارسال شده');
+                if(state==1)
+                    thisTd.html('ارسال شده');
+                  else if(state==3)
+                      thisTd.html('لغو درخواست شده');
               }
               else{
                 alert("عملیات شکست مواجه شد");

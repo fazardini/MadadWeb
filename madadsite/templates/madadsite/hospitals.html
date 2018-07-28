@@ -1,6 +1,6 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
-
+{% block title %}بیمارستان ها{% endblock %}
 {% block active_menu %}
     <li><a href="{% url 'my_drugs' safe_id=safe_id %}">اقلام من</a></li>
     <li><a href="{% url 'all_drugs' %}">همه اقلام</a></li>

@@ -186,3 +186,12 @@ input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
 }
+.lte3{
+    background-color: #FE5B5B !important;
+}
+.lte6{
+    background-color: #ffc864 !important;
+}
+.gt6{
+    /*background-color: ;*/
+}

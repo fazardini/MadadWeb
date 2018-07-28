@@ -5,7 +5,7 @@ from madadcore.models import Hospital, Drug, SurplusDrug, OrderedDrug
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from madadcore.helpers.mysecrets import token_hex
-from datetime import date, timezone
+from datetime import date, timezone, timedelta
 from django.db.models import Sum, Q
 import calendar
 import json
@@ -111,46 +111,45 @@ def my_drugs(request, safe_id):
     user = request.user
     hospital = Hospital.objects.filter(safe_id=safe_id).first()
     access = (hospital.user == user)
-    # if request.method == 'POST':
-    #     if access:
-    #         try:
-    #             name = request.POST.get('drug_name')
-    #             safe_id = request.POST.get('drug_id')
-    #             count = request.POST.get('drug_count')
-    #             price = request.POST.get('drug_price', 0)
-    #             cat = request.POST.get('drug_cat', 0)
-    #             drug_type = request.POST.get('drug_type', 0)
-    #             month = int(request.POST.get('drug_month'))
-    #             year = int(request.POST.get('drug_year'))
-    #             last_day_this_month = calendar.monthrange(year, month)[1]
-    #             drug_date = date(year, month, last_day_this_month)
-    #             if safe_id:
-    #                 drug = Drug.objects.filter(safe_id=safe_id).first()
-    #             else:
-    #                 safe_id = token_hex(8)
-    #                 drug = Drug.objects.create(name=name, safe_id=safe_id)
-    #             safe_id = token_hex(8)
-    #             SurplusDrug.objects.create(safe_id=safe_id, current_count=count, initial_count=count, expiration_date=drug_date,
-    #                                        drug=drug, hospital=hospital, cat=cat,
-    #                                        drug_type=drug_type, price=price)
-    #             done = True
-    #         except Exception as e:
-    #             err = e
-    #             safe_id = False
-    #             done = False
-    #         response_dict = {'access': True, 'done': done, 'safe_id': safe_id}
-    #     else:
-    #         response_dict = {'access': False}
-    #     return JsonResponse(response_dict)
     if access:
-        surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).exclude(current_count=0).distinct().values(
+        surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).exclude(
+            Q(expiration_date__lt=the_today()) |
+            Q(current_count=0)
+        ).distinct()
+        if request.method == 'POST':
+            sort_by = int(request.POST.get('sorted_by', 0))
+            drug_type = request.POST.get('drug_type', 'all')
+            if drug_type != 'all':
+                surplus_drugs = surplus_drugs.filter(drug_type=drug_type)
+            if sort_by == 4:
+                surplus_drugs = surplus_drugs.order_by('current_count')
+            elif sort_by == 3:
+                surplus_drugs = surplus_drugs.order_by('-current_count')
+            elif sort_by == 2:
+                surplus_drugs = surplus_drugs.order_by('-expiration_date')
+            elif sort_by == 1:
+                surplus_drugs = surplus_drugs.order_by('expiration_date')
+            else:
+                surplus_drugs = surplus_drugs.order_by('drug__name')
+            surplus_drugs = surplus_drugs.values(
+                'safe_id', 'drug__name', 'expiration_date', 'current_count', 'cat',
+                'drug_type', 'price')
+        surplus_drugs = surplus_drugs.values(
             'safe_id', 'drug__name', 'expiration_date', 'current_count', 'cat',
             'drug_type', 'price')
         for drug in surplus_drugs:
             drug['ordered'] = not OrderedDrug.objects.filter(surplus_drug__safe_id=drug['safe_id']).exists()
             drug['cat'] = SurplusDrug.CAT_DICT[drug['cat']]
             drug['drug_type'] = SurplusDrug.TYPE_DICT[drug['drug_type']]
+            if drug['expiration_date'] - the_today() <= timedelta(days=90):
+                drug['exp_state'] = "lte3"
+            elif drug['expiration_date'] - the_today() <= timedelta(days=180):
+                drug['exp_state'] = "lte6"
+            else:
+                drug['exp_state'] = "gt6"
         context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
+        if request.method == 'POST':
+            return JsonResponse(context_dict)
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
         return render(request, 'madadsite/drugs.html', {'access': access})

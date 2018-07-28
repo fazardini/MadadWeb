@@ -68,22 +68,36 @@
           </div>
           <div class="text-left"><button type="submit" id="add_drug" class="margin-10">افزودن قلم</button></div>
         </div>
-<!--         <div>
-          <h3>فیلترها</h3>
-          <div class="row top-10">
-            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">جستجو</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو یا بیمارستان را وارد کنید" id="drug_year" required>
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-          </div>
-          <div class="row top-10">
-            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">مرتب سازی</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="سال" id="drug_year" required>
-            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
-          </div>
-        </div> -->
         <input type="text" class="d-none" id="hospital_id" value="{{ safe_id }}">
       </div>
-      <div class="col-lg-1 col-md-1 col-sm-1"></div>
+        <div class="col-lg-1 col-md-1 col-sm-1"></div></div>
+        <div class="row">
+          <div class="col-lg-1 col-md-1 col-sm-1"></div>
+          <div class="col-lg-10 col-md-10 col-sm-10 right-part">
+            <h3>فیلترها</h3>
+            <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+              <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نوع</label>
+              <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="filter_type" required>
+                <option value="all">همه موارد</option>
+                <option value="1">راکد</option>
+                <option value="2">مازاد</option>
+              </select>
+              <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+              <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">مرتب سازی</label>
+              <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="sort" required>
+                <option value="0">حروف الفبا</option>
+                <option value="1">زودترین انقضا</option>
+                <option value="2">دیرترین انقضا</option>
+                <option value="3">بیشترین تعداد</option>
+                <option value="4">کمترین تعداد</option>
+              </select>
+              <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+            </div>
+          </div>
+          <div class="col-lg-1 col-md-1 col-sm-1"></div>
+        </div>
       <div class="col-lg-12 col-md-12 col-sm-12">
         <h1>اقلام من</h1>
         <table class="table table-bordered table-striped">
@@ -100,7 +114,7 @@
           </thead>
           <tbody id="all_drugs">
             {% for item in surplus_drugs %}
-              <tr data-item-id={{item.safe_id}}>
+              <tr data-item-id={{item.safe_id}} class={{ item.exp_state }}>
                 <td><span class="drug-name">{{item.drug__name}}</span></td>
                 <td><span class="drug-cat">{{item.cat}}</span></td>
                 <td><span class="drug-type">{{item.drug_type}}</span></td>
@@ -381,6 +395,113 @@
         //   });
         //   return false;
         // });
+        function getMyDrugs() {
+          var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+          var hospitalId = $("#hospital_id").val();
+          var drugType = $("#filter_type").val();
+          var sortedBy = $("#sort").val();
+          $.ajax({
+            url : "/drugs/"+hospitalId+"/",
+            type : "POST",
+            dataType: "json",
+            data : {
+              drug_type: drugType,
+              sorted_by : sortedBy,
+              csrfmiddlewaretoken: csrftoken
+            },
+            success : function(json) {
+              $("#all_drugs").html('');
+              var drugs = json.surplus_drugs;
+              if (drugs) {
+                  for (i in drugs) {
+                      var price = drugs[i]['price'] ? drugs[i]['price'] : '-';
+                      var expDate = drugs[i]['expiration_date'].split('-')
+                      console.log(drugs[i]['expiration_date'].split('-')[0])
+                      $("#all_drugs").append('<tr data-item-id=' + drugs[i]['safe_id'] + ' class=' + drugs[i]['exp_state'] + '>' +
+                          '<td><span class="drug-name">' + drugs[i]['drug__name'] + '</span></td>' +
+                          '<td><span class="drug-cat">' + drugs[i]['cat'] + '</span></td>' +
+                          '<td><span class="drug-type">' + drugs[i]['drug_type'] + '</span></td>' +
+                          '<td><span class="drug-price">' + price + '</span></td>' +
+                          '<td><span class="drug-year">' + expDate[0] + '</span>' +
+                          '<input value="' + expDate[1] + '" class="hiden inp-drug-month"/>' +
+                          '/<span class="drug-month">' + expDate[1] + '</span>' +
+                          '<input value="' + expDate[0] + '" class="hiden inp-drug-year"></td>' +
+                          '<td><span class="drug-count">' + drugs[i]['current_count'] + '</span>' +
+                          '<input value="' + drugs[i]['current_count'] + '" class="hiden inp-drug-count"></td>' +
+                          '<td id="deletable_' + drugs[i]['safe_id'] + '"></td></tr>');
+                      if (drugs[i]['ordered']) {
+                          $("#deletable_" + drugs[i]['safe_id']).html('<span class="glyphicon glyphicon-trash td-icon del"></span>' +
+                              '<span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span>' +
+                              '<span class="glyphicon glyphicon-ok-circle td-icon hiden savedel"></span>')
+                      }
+                  }
+              }
+              $(".del").click(function(e){
+                  var thisDrug = $(this).closest('tr');
+                  thisDrug.find('.cansel').show();
+                  thisDrug.find('.savedel').show();
+                  thisDrug.find('.edit').hide();
+                  $(this).hide();
+                });
+                $(".cansel").click(function(e){
+                  var thisDrug = $(this).closest('tr');
+                  thisDrug.find('.edit').show();
+                  thisDrug.find('.del').show();
+                  thisDrug.find('.savedel').hide();
+                  thisDrug.find('.savedit').hide();
+                  thisDrug.find('.drug-year').show();
+                  thisDrug.find('.drug-month').show();
+                  thisDrug.find('.drug-count').show();
+                  thisDrug.find('.inp-drug-year').hide();
+                  thisDrug.find('.inp-drug-month').hide();
+                  thisDrug.find('.inp-drug-count').hide();
+                  $(this).hide();
+                });
+                $(".savedel").click(function(e){
+                  var thisDrug = $(this).closest('tr');
+                  var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+                  var drugId = thisDrug.attr('data-item-id');
+                  $.ajax({
+                    url : "/drugs/delete/",
+                    type : "POST",
+                    dataType: "json",
+                    data : {
+                      drug_id : drugId,
+                      csrfmiddlewaretoken: csrftoken,
+                    },
+                    success : function(json) {
+                      if (json.done) {
+                        thisDrug.remove();
+                        alert("قلم با موفقیت حذف شد!");
+                      }
+                      else{
+                        alert("عملیات با شکست مواجه شد");
+                        thisDrug.find('.edit').show();
+                        thisDrug.find('.del').show();
+                        thisDrug.find('.savedel').hide();
+                        thisDrug.find('.savedit').hide();
+                        $(this).hide();
+                      }
+                    },
+                    error : function(xhr,errmsg,err) {
+                      alert("عملیات با مشکل مواجه شد.");
+                    }
+                  });
+                  return false;
+                });
+            },
+            error : function(xhr,errmsg,err) {
+              alert("عملیات با مشکل مواجه شد.");
+            }
+          });
+          return false;
+        }
+        $("#sort").change(function () {
+          getMyDrugs();
+        });
+        $("#filter_type").change(function () {
+          getMyDrugs();
+        });
       });
     </script>
     {% endblock %}  

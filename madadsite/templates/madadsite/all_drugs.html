@@ -43,8 +43,8 @@
             <option value="2">کمترین تعداد مازاد</option>
             <option value="3">زودترین انقضا</option>
             <option value="4">دیرترین انقضا</option>
-            <option value="5">زودترین ثبت</option>
-            <option value="6">دیرترین ثبت</option>
+            <option value="5">جدید ترین ثبت</option>
+{#            <option value="6">دیرترین ثبت</option>#}
           </select>
           <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
         </div>
@@ -64,7 +64,7 @@
           </thead>
           <tbody id="all_drugs">
             {% for item in drugs %}
-              <tr>
+              <tr class="{{ item.exp_state }}">
                 <td>{{ item.drug__name }}</td>
                 <td>{{ item.sum_count }}</td>
                 <td><div class="drug-hospital" id="drug_{{item.drug__safe_id}}">نمایش جزئیات</div></td>
@@ -235,7 +235,7 @@
               var drugs = json.drugs;
               if(drugs){
                 for(i in drugs){
-                  $("#all_drugs").append('<tr><td>'+drugs[i]['drug__name']+'</td><td>'+drugs[i]['sum_count']+'</td><td><div class="drug-hospital" id="drug_'+drugs[i]['drug__safe_id']+'">نمایش جزئیات</div></td></tr>');
+                  $("#all_drugs").append('<tr class="'+drugs[i]['exp_state']+'"><td>'+drugs[i]['drug__name']+'</td><td>'+drugs[i]['sum_count']+'</td><td><div class="drug-hospital" id="drug_'+drugs[i]['drug__safe_id']+'">نمایش جزئیات</div></td></tr>');
                 }
                 $(".drug-hospital").click(function(e){
                   e.defaultPrevented;
@@ -257,7 +257,15 @@
                           $("#drug_name_modal").html(json.drun_name);
                           var hospitals = json.hospitals;
                           for (i in hospitals) {
-                            $("#hospitals_drug").append('<tr><td>'+hospitals[i]['hospital__name']+'</td><td>'+hospitals[i]['expiration_date']+'</td><td>'+hospitals[i]['current_count']+'</td><td><input id="order_count'+hospitals[i]['safe_id']+'"></td><td class="save-order" id="save_'+hospitals[i]['safe_id']+'"><div>ثبت</div></td></tr>');
+                              var price = hospitals[i]['price'] ? hospitals[i]['price'] : '-';
+                            $("#hospitals_drug").append('<tr class="'+hospitals[i]['exp_state']+'">' +
+                                '<td>'+hospitals[i]['hospital__name']+'</td>' +
+                                '<td>'+hospitals[i]['expiration_date']+'</td>' +
+                                '<td>'+price+'</td>' +
+                                '<td>'+hospitals[i]['current_count']+'</td>' +
+                                '<td><input id="order_count'+hospitals[i]['safe_id']+'"></td>' +
+                                '<td class="save-order" id="save_'+hospitals[i]['safe_id']+'"><div>ثبت</div></td>' +
+                                '</tr>');
                           }
                           $(".save-order").click(function(e){
                             var str = this.id;

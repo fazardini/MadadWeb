@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.urls import reverse
@@ -233,13 +235,18 @@ def all_hospitals(request):
 
 
 def all_drugs(request):
+    all_drugs = SurplusDrug.objects.all().exclude(Q(expiration_date__lt=the_today()) |
+                                                  Q(current_count=0)).distinct().values(
+        'drug__name', 'drug__safe_id').annotate(
+        sum_count=Sum('current_count')).order_by('-sum_count')
+    sort_by = 1
     if request.method == 'POST':
         search_text = request.POST.get('search_text')
         sort_by = int(request.POST.get('sorted_by', 0))
-        all_drugs = SurplusDrug.objects.all().exclude(
-            Q(expiration_date__lt=the_today()) |
-            Q(current_count=0)
-        ).values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
+        # all_drugs = SurplusDrug.objects.all().exclude(
+        #     Q(expiration_date__lt=the_today()) |
+        #     Q(current_count=0)
+        # ).values('drug__name', 'drug__safe_id').annotate(sum_count=Sum('current_count'))
         if search_text:
             all_drugs = all_drugs.filter(
                 Q(drug__name__icontains=search_text) | Q(drug__name__icontains=search_text)).values(
@@ -248,12 +255,35 @@ def all_drugs(request):
             all_drugs = all_drugs.order_by('-sum_count')
         elif sort_by == 2:
             all_drugs = all_drugs.order_by('sum_count')
+
+    for drug in all_drugs:
+        exp_drug = SurplusDrug.objects.filter(drug__safe_id=drug['drug__safe_id']).exclude(
+            Q(expiration_date__lt=the_today()) |
+            Q(current_count=0)).order_by('expiration_date').first()
+        if sort_by in (3, 4):
+            drug['exp_date'] = exp_drug.expiration_date
+        elif sort_by in (5, 6):
+            first_drug = SurplusDrug.objects.filter(drug__safe_id=drug['drug__safe_id']).exclude(
+                Q(expiration_date__lt=the_today()) |
+                Q(current_count=0)).order_by('created_at').first()
+            drug['create_date'] = first_drug.created_at
+        if exp_drug.expiration_date - the_today() <= timedelta(days=90):
+            drug['exp_state'] = "lte3"
+        elif exp_drug.expiration_date - the_today() <= timedelta(days=180):
+            drug['exp_state'] = "lte6"
+        else:
+            drug['exp_state'] = "gt6"
+    if request.method == 'POST':
+        if sort_by == 3:
+            all_drugs = sorted(all_drugs, key=itemgetter('exp_date'), reverse=False)
+        elif sort_by == 4:
+            all_drugs = sorted(all_drugs, key=itemgetter('exp_date'), reverse=True)
+        elif sort_by == 5:
+            all_drugs = sorted(all_drugs, key=itemgetter('create_date'), reverse=True)
+        elif sort_by == 6:
+            all_drugs = sorted(all_drugs, key=itemgetter('create_date'), reverse=False)
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
-    all_drugs = SurplusDrug.objects.all().exclude(Q(expiration_date__lt=the_today()) |
-                                                  Q(current_count=0)).distinct().values(
-        'drug__name', 'drug__safe_id').annotate(
-        sum_count=Sum('current_count')).order_by('-sum_count')
     context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/all_drugs.html', context_dict)
 

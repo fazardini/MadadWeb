@@ -1,16 +1,16 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
 
-{% block title %}داروهای مازاد من{% endblock %}
+{% block title %}اقلام من{% endblock %}
 
 {% block header %}
 {% endblock %}
 
 {% block active_menu %}
-    <li class="active"><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
-    <li><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
-    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
-    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li class="active"><a href="{% url 'my_drugs' safe_id=safe_id %}">اقلام من</a></li>
+    <li><a href="{% url 'all_drugs' %}">همه اقلام</a></li>
+    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}">اقلام دریافتی</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">اقلام ارسالی</a></li>
     <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
     {% if request.user.is_staff %}
       <li><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>
@@ -20,31 +20,53 @@
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
-      <div class="col-lg-4 col-md-4 col-sm-4 right-part">
+      <div class="col-lg-1 col-md-1 col-sm-1"></div>
+      <div class="col-lg-10 col-md-10 col-sm-10 right-part">
         <div>
-          <h3>افزودن داروی جدید</h3>
-          <div class="row top-10">
-            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام دارو</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام دارو" id="drug_name" data-drug="" required>
+          <h3>افزودن قلم جدید</h3>
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نام</label>
+            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="text" placeholder="نام قلم" id="drug_name" data-drug="" required>
             <span class="glyphicon glyphicon-remove d-none" id="remove_drug"></span>
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
-          <div class="row top-10">
-            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">تعداد</label>
-            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="تعداد دارو" id="drug_count" required>
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">قیمت</label>
+            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" placeholder="قیمت واحد به ریال" type="text" id="drug_price" required>
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
-          <div class="row top-10">
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">تعداد</label>
+            <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="تعداد " id="drug_count" required>
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">دسته</label>
+            <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="cat" required>
+              <option value="1">دارو</option>
+              <option value="2">لوازم</option>
+            </select>
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
+            <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">نوع</label>
+            <select class="col-lg-8 col-md-8 col-sm-8 col-xs-8" id="drug_type" required>
+              <option value="1">راکد</option>
+              <option value="2">مازاد</option>
+            </select>
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
             <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">ماه انقضا</label>
             <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="ماه" id="drug_month" required min="1" max="12">
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
-          <div class="row top-10">
+          <div class="col-lg-6 col-md-6 col-sm-6 top-10">
             <label class="col-lg-3 col-md-3 col-sm-3 col-xs-3 text-left">سال انقضا</label>
             <input class="col-lg-8 col-md-8 col-sm-8 col-xs-8" type="number" placeholder="سال" id="drug_year" required min="2018" max="3000">
             <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
           </div>
-          <div class="text-left"><button type="submit" id="add_drug" class="margin-10">افزودن دارو</button></div>
+          <div class="text-left"><button type="submit" id="add_drug" class="margin-10">افزودن قلم</button></div>
         </div>
 <!--         <div>
           <h3>فیلترها</h3>
@@ -61,13 +83,16 @@
         </div> -->
         <input type="text" class="d-none" id="hospital_id" value="{{ safe_id }}">
       </div>
-
-      <div class="col-lg-8 col-md-8 col-sm-8 left-part">
-        <h1>داروهای شما</h1>
+      <div class="col-lg-1 col-md-1 col-sm-1"></div>
+      <div class="col-lg-12 col-md-12 col-sm-12">
+        <h1>اقلام من</h1>
         <table class="table table-bordered table-striped">
           <thead>
             <tr>
               <th>نام</th>
+              <th>دسته</th>
+              <th>نوع</th>
+              <th>قیمت واحد</th>
               <th>تاریخ انقضا</th>
               <th>تعداد مازاد</th>
               <th></th>
@@ -76,7 +101,10 @@
           <tbody id="all_drugs">
             {% for item in surplus_drugs %}
               <tr data-item-id={{item.safe_id}}>
-                <td><span class="drug-name">{{item.drug__name}}<span></td>
+                <td><span class="drug-name">{{item.drug__name}}</span></td>
+                <td><span class="drug-cat">{{item.cat}}</span></td>
+                <td><span class="drug-type">{{item.drug_type}}</span></td>
+                <td><span class="drug-price">{% if item.price %}{{item.price}}{% else %}-{% endif %}</span></td>
                 <td><span class="drug-year">{{item.expiration_date.year}}</span><input value="{{item.expiration_date.month}}" class="hiden inp-drug-month">/<span class="drug-month">{{item.expiration_date.month}}</span><input value="{{item.expiration_date.year}}" class="hiden inp-drug-year"></td>
                 <td><span class="drug-count">{{item.current_count}}</span><input value="{{item.current_count}}" class="hiden inp-drug-count"></td>
                 <td>
@@ -130,6 +158,9 @@
             return false;
           return true;
         }
+        $("#drug_price").keypress(function(evt){
+          return isNumberKey(evt);
+        });
         $("#drug_count").keypress(function(evt){
           return isNumberKey(evt);
         });
@@ -148,8 +179,19 @@
           var hospitalId = $("#hospital_id").val();
           var drugMonth = $("#drug_month").val();
           var drugYear = $("#drug_year").val();
+          var drugType = $("#drug_type").val();
+          var drugCat = $("#cat").val();
+          var drugPrice = $("#drug_price").val();
+          var catArray = {
+              '1': 'دارو',
+              '2': 'لوازم'
+          };
+          var typeArray = {
+              '1': 'راکد',
+              '2': 'مازاد'
+          };
           $.ajax({
-              url : "/drugs/"+hospitalId+"/", 
+              url : "/drugs/create/",
               type : "POST",
               dataType: "json", 
               data : {
@@ -158,20 +200,25 @@
                 drug_count : drugCount,
                 drug_month: drugMonth,
                 drug_year: drugYear,
+                drug_type: drugType,
+                drug_cat: drugCat,
+                drug_price: drugPrice,
                 csrfmiddlewaretoken: csrftoken,
               },
               success : function(json) {
                 $("#drug_name").val('');
+                $("#drug_price").val('');
                 $("#drug_count").val('');
                 $("#drug_month").val('');
                 $("#drug_year").val('');
                 $("#remove_drug").hide();
+                $("#drug_name").attr("data-drug", '');
                 if (json.done) {
-                  $("#all_drugs").prepend('<tr data-item-id='+json.safe_id+'><td>'+drugName+'</td><td> '+drugYear+'/'+drugMonth+'</td><td>'+drugCount+'</td><td><span class="glyphicon glyphicon-trash td-icon del"></span><span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden savedel"></span></td></tr>');
-                  alert("دارو با موفقیت ثبت شد!");
+                  $("#all_drugs").prepend('<tr data-item-id='+json.safe_id+'><td>'+drugName+'</td><td>'+catArray[drugCat]+'</td><td>'+typeArray[drugType]+'</td><td>'+drugPrice+'</td><td> '+drugYear+'/'+drugMonth+'</td><td>'+drugCount+'</td><td><span class="glyphicon glyphicon-trash td-icon del"></span><span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden savedel"></span></td></tr>');
+                  alert("قلم با موفقیت ثبت شد!");
                 }
                 else{
-                  alert("ثبت دارو با شکست مواجه شد");
+                  alert("ثبت قلم با شکست مواجه شد");
                 }
                 if(!json.access){
                   alert("دسترسی غیرمجاز!");
@@ -212,7 +259,7 @@
             success : function(json) {
               if (json.done) {
                 thisDrug.remove();
-                alert("دارو با موفقیت حذف شد!");
+                alert("قلم با موفقیت حذف شد!");
               }
               else{
                 alert("عملیات با شکست مواجه شد");
@@ -285,7 +332,7 @@
             success : function(json) {
               if (json.done) {
                 thisDrug.remove();
-                alert("دارو با موفقیت حذف شد!");
+                alert("قلم با موفقیت حذف شد!");
               }
               else{
                 alert("عملیات با شکست مواجه شد");

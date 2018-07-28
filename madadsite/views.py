@@ -69,16 +69,19 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('login'))
 
 
-def my_drugs(request, safe_id):
+def create_my_drugs(request):
     user = request.user
-    hospital = Hospital.objects.filter(safe_id=safe_id).first()
-    access = (hospital.user == user)
+    hospital = user.hospital
+    access = hospital
     if request.method == 'POST':
         if access:
             try:
                 name = request.POST.get('drug_name')
                 safe_id = request.POST.get('drug_id')
                 count = request.POST.get('drug_count')
+                price = request.POST.get('drug_price', 0)
+                cat = request.POST.get('drug_cat', 0)
+                drug_type = request.POST.get('drug_type', 0)
                 month = int(request.POST.get('drug_month'))
                 year = int(request.POST.get('drug_year'))
                 last_day_this_month = calendar.monthrange(year, month)[1]
@@ -89,8 +92,10 @@ def my_drugs(request, safe_id):
                     safe_id = token_hex(8)
                     drug = Drug.objects.create(name=name, safe_id=safe_id)
                 safe_id = token_hex(8)
-                SurplusDrug.objects.create(safe_id=safe_id, current_count=count, initial_count=count, expiration_date=drug_date,
-                                           drug=drug, hospital=hospital)
+                SurplusDrug.objects.create(safe_id=safe_id, current_count=count, initial_count=count,
+                                           expiration_date=drug_date,
+                                           drug=drug, hospital=hospital, cat=cat,
+                                           drug_type=drug_type, price=price)
                 done = True
             except Exception as e:
                 err = e
@@ -100,11 +105,51 @@ def my_drugs(request, safe_id):
         else:
             response_dict = {'access': False}
         return JsonResponse(response_dict)
+
+
+def my_drugs(request, safe_id):
+    user = request.user
+    hospital = Hospital.objects.filter(safe_id=safe_id).first()
+    access = (hospital.user == user)
+    # if request.method == 'POST':
+    #     if access:
+    #         try:
+    #             name = request.POST.get('drug_name')
+    #             safe_id = request.POST.get('drug_id')
+    #             count = request.POST.get('drug_count')
+    #             price = request.POST.get('drug_price', 0)
+    #             cat = request.POST.get('drug_cat', 0)
+    #             drug_type = request.POST.get('drug_type', 0)
+    #             month = int(request.POST.get('drug_month'))
+    #             year = int(request.POST.get('drug_year'))
+    #             last_day_this_month = calendar.monthrange(year, month)[1]
+    #             drug_date = date(year, month, last_day_this_month)
+    #             if safe_id:
+    #                 drug = Drug.objects.filter(safe_id=safe_id).first()
+    #             else:
+    #                 safe_id = token_hex(8)
+    #                 drug = Drug.objects.create(name=name, safe_id=safe_id)
+    #             safe_id = token_hex(8)
+    #             SurplusDrug.objects.create(safe_id=safe_id, current_count=count, initial_count=count, expiration_date=drug_date,
+    #                                        drug=drug, hospital=hospital, cat=cat,
+    #                                        drug_type=drug_type, price=price)
+    #             done = True
+    #         except Exception as e:
+    #             err = e
+    #             safe_id = False
+    #             done = False
+    #         response_dict = {'access': True, 'done': done, 'safe_id': safe_id}
+    #     else:
+    #         response_dict = {'access': False}
+    #     return JsonResponse(response_dict)
     if access:
         surplus_drugs = SurplusDrug.objects.filter(hospital=hospital).exclude(current_count=0).distinct().values(
-            'safe_id', 'drug__name', 'expiration_date', 'current_count')
+            'safe_id', 'drug__name', 'expiration_date', 'current_count', 'cat',
+            'drug_type', 'price')
         for drug in surplus_drugs:
             drug['ordered'] = not OrderedDrug.objects.filter(surplus_drug__safe_id=drug['safe_id']).exists()
+            drug['cat'] = SurplusDrug.CAT_DICT[drug['cat']]
+            drug['drug_type'] = SurplusDrug.TYPE_DICT[drug['drug_type']]
         context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
         return render(request, 'madadsite/drugs.html', context_dict)
     else:
@@ -314,7 +359,7 @@ def create_all_drugs_excel(request):
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="Drugs.xls"'
     wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('همه داروهای مازاد')
+    ws = wb.add_sheet('همه اقلام')
 
     row_num = 0
     columns = ['نام دارو', 'نام بیمارستان', 'تعداد مازاد', 'تاریخ انقضا']

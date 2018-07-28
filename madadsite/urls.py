@@ -6,16 +6,19 @@ urlpatterns = [
     url(r'^login/', user_login, name='login'),
     url(r'^logout/', user_logout, name='logout'),
 
-    #  daroohaye mazad in bomarestan
+    #  daroohaye mazad in bimarestan
     url(r'^drugs/(?P<safe_id>[0-9a-f]{16})/$', my_drugs,  name='my_drugs'),
-    
-    #  hazfe daroohaye mazad in bomarestan
-    url(r'^drugs/delete/', delete_my_drugs, name='delete_my_drugs'),
 
-    # daroohaie ke in bimarestan sefaresh dade
+    #  sabte daroohaye mazad in bimarestan
+    url(r'^drugs/create/$', create_my_drugs, name='create_my_drugs'),
+
+    #  hazfe daroohaye mazad in bimarestan
+    url(r'^drugs/delete/$', delete_my_drugs, name='delete_my_drugs'),
+
+    # daroohaie ke in bimarestan sefaresh dade - daryafti
     url(r'^ordered-drugs/(?P<safe_id>[0-9a-f]{16})/$', ordered_drugs,  name='ordered_drugs'),
 
-    # daroohaie ke in bimarestan sefaresh gerefte
+    # daroohaie ke in bimarestan sefaresh gerefte - ersali
     url(r'^order-token-drugs/(?P<safe_id>[0-9a-f]{16})/$', order_token_drugs, name='order_token_drugs'),
 
     # hame daroohaye mazad

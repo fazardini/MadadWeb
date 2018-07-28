@@ -1,16 +1,16 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
 
-{% block title %}همه داروهای مازاد{% endblock %}
+{% block title %}همه اقلام{% endblock %}
 
 {% block header %}
 {% endblock %}
 
 {% block active_menu %}
-    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
-    <li class="active"><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
-    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
-    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">اقلام من</a></li>
+    <li class="active"><a href="{% url 'all_drugs' %}">همه اقلام</a></li>
+    <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}">اقلام دریافتی</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">اقلام ارسالی</a></li>
     <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
     {% if request.user.is_staff %}
       <li><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>
@@ -48,7 +48,7 @@
       </div>
 
       <div class="col-lg-8 col-md-8 col-sm-8 left-part">
-        <h1 class="display-inline">همه داروهای مازاد</h1>
+        <h1 class="display-inline">همه اقلام</h1>
         <a class="create-excel" href="{% url 'create_all_drugs_excel' %}">خروجی اکسل</a>
         <table class="table table-bordered table-striped">
           <thead>

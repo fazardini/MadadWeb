@@ -1,16 +1,16 @@
 {% extends "madadsite/base.html" %}
 {% load static %}
 
-{% block title %}داروهای مازاد من{% endblock %}
+{% block title %}اقلام من{% endblock %}
 
 {% block header %}
 {% endblock %}
 
 {% block active_menu %}
-    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">داروهای مازاد من</a></li>
-    <li><a href="{% url 'all_drugs' %}">همه داروهای مازاد</a></li>
-    <li class="active"><a href="{% url 'ordered_drugs' safe_id=safe_id %}"> داروهای سفارش داده شده</a></li>
-    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">داروهای سفارش گرفته شده</a></li>
+    <li><a href="{% url 'my_drugs' safe_id=safe_id %}">اقلام من</a></li>
+    <li><a href="{% url 'all_drugs' %}">همه اقلام</a></li>
+    <li class="active"><a href="{% url 'ordered_drugs' safe_id=safe_id %}">اقلام دریافتی</a></li>
+    <li><a href="{% url 'order_token_drugs' safe_id=safe_id %}">اقلام ارسالی</a></li>
     <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
     {% if request.user.is_staff %}
       <li><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>
@@ -20,7 +20,7 @@
 {% block content %}{% csrf_token %}
   <div class="container-fluid">
     <div class="row my-drugs">
-      <h1>داروهای سفارش داده شده</h1>
+      <h1>اقلام دریافتی</h1>
       <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
       <div class="col-lg-10 col-md-10 col-sm-10 right-part">
         <h3>فیلترها</h3>

@@ -55,6 +55,7 @@
               <tr>
                 <th>نام دارو</th>
                 <th>تاریخ انقضا</th>
+                <th>قیمت واحد</th>
                 <th>نام بیمارستان</th>
                 <th>تعداد سفارش</th>
                 <th>وضعیت</th>
@@ -62,9 +63,10 @@
             </thead>
             <tbody id="all_drugs">
               {% for item in drugs %}
-                <tr data-item-id="{{item.safe_id}}">
+                <tr class="{{ item.exp_state }}" data-item-id="{{item.safe_id}}">
                   <td>{{item.surplus_drug__drug__name}}</td>
                   <td>{{item.surplus_drug__expiration_date.year}}/{{item.surplus_drug__expiration_date.month}}</td>
+                  <td>{% if item.price %}{{ item.price }}{% else %}-{% endif %}</td>
                   <td>{{item.surplus_drug__hospital__name}}</td>
                   <td>{{item.ordered_count}}</td>
                   <td>
@@ -156,6 +158,7 @@
               if(drugs){
                 for(i in drugs){
                   var state = '';
+                  var price = drugs[i]['price'] ? drugs[i]['price'] : '-';
                   if (drugs[i]['state']==1){
                     state = '<span class="change-state">تایید دریافت</span><span class="glyphicon glyphicon-remove-circle td-icon hiden cansel"></span><span class="glyphicon glyphicon-ok-circle td-icon hiden save-state"></span>';
                   }
@@ -165,7 +168,11 @@
                     else{
                       state = 'دریافت شده';
                     }
-                  $("#all_drugs").append('<tr data-item-id="'+drugs[i]['safe_id']+'"><td>'+drugs[i]['surplus_drug__drug__name']+'</td><td>'+drugs[i]['surplus_drug__expiration_date']+'</td><td>'+drugs[i]['surplus_drug__hospital__name']+'</td><td>'+drugs[i]['ordered_count']+'</td><td>'+state+'</td></tr>');
+                  $("#all_drugs").append('<tr class="'+drugs[i]['exp_state']+'" data-item-id="'+drugs[i]['safe_id']+'">' +
+                      '<td>'+drugs[i]['surplus_drug__drug__name']+'</td>' +
+                      '<td>'+drugs[i]['surplus_drug__expiration_date']+'</td>' +
+                      '<td>'+price+'</td>' +
+                      '<td>'+drugs[i]['surplus_drug__hospital__name']+'</td><td>'+drugs[i]['ordered_count']+'</td><td>'+state+'</td></tr>');
                 }
               }
         $(".change-state").click(function(e){

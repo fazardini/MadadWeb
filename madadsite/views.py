@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from madadcore.helpers.mysecrets import token_hex
 from datetime import date, timezone, timedelta
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, F
 import calendar
 import json
 import xlwt
@@ -158,6 +158,12 @@ def my_drugs(request, safe_id):
 
 
 def ordered_drugs(request, safe_id):
+    """
+    اقلام دریافتی
+    :param request: 
+    :param safe_id: 
+    :return: 
+    """
     if request.method == 'POST':
         search_text = request.POST.get('search_text')
         sort_by = int(request.POST.get('sorted_by', 1))
@@ -175,16 +181,31 @@ def ordered_drugs(request, safe_id):
             all_drugs = all_drugs.order_by('ordered_count')
         all_drugs = all_drugs.values(
             'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-            'surplus_drug__hospital__name', 'safe_id', 'state')
+            'surplus_drug__hospital__name', 'safe_id', 'state',
+            price=F('surplus_drug__price'))
 
         for drug in all_drugs:
+            if drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=90):
+                drug['exp_state'] = "lte3"
+            elif drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=180):
+                drug['exp_state'] = "lte6"
+            else:
+                drug['exp_state'] = "gt6"
             drug['surplus_drug__expiration_date'] = "{}/{}".format(drug['surplus_drug__expiration_date'].year, drug['surplus_drug__expiration_date'].month)
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
 
     ordered_drugs = OrderedDrug.objects.filter(client_hospital__safe_id=safe_id).values(
         'surplus_drug__drug__name', 'ordered_count', 'surplus_drug__expiration_date',
-        'surplus_drug__hospital__name', 'safe_id', 'state').order_by('surplus_drug__expiration_date')
+        'surplus_drug__hospital__name', 'safe_id', 'state',
+        price=F('surplus_drug__price')).order_by('surplus_drug__expiration_date')
+    for drug in ordered_drugs:
+        if drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=90):
+            drug['exp_state'] = "lte3"
+        elif drug['surplus_drug__expiration_date'] - the_today() <= timedelta(days=180):
+            drug['exp_state'] = "lte6"
+        else:
+            drug['exp_state'] = "gt6"
     context_dict = {'drugs': list(ordered_drugs), 'safe_id': request.user.hospital.safe_id}
     return render(request, 'madadsite/drugs_ordered.html', context_dict)
 

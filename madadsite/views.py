@@ -13,6 +13,7 @@ import calendar
 import json
 import xlwt
 
+from madadsite.helpers.common_helpers import pending_drugs_count
 from madadsite.helpers.datetime_helpers import the_today
 
 
@@ -149,7 +150,9 @@ def my_drugs(request, safe_id):
                 drug['exp_state'] = "lte6"
             else:
                 drug['exp_state'] = "gt6"
-        context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs), 'safe_id': request.user.hospital.safe_id}
+        context_dict = {'access': access, 'surplus_drugs': list(surplus_drugs),
+                        'safe_id': request.user.hospital.safe_id,
+                        'pending_drugs_count': pending_drugs_count(request.user.hospital)}
         if request.method == 'POST':
             return JsonResponse(context_dict)
         return render(request, 'madadsite/drugs.html', context_dict)
@@ -206,11 +209,19 @@ def ordered_drugs(request, safe_id):
             drug['exp_state'] = "lte6"
         else:
             drug['exp_state'] = "gt6"
-    context_dict = {'drugs': list(ordered_drugs), 'safe_id': request.user.hospital.safe_id}
+    context_dict = {'drugs': list(ordered_drugs),
+                    'safe_id': request.user.hospital.safe_id,
+                    'pending_drugs_count': pending_drugs_count(request.user.hospital)}
     return render(request, 'madadsite/drugs_ordered.html', context_dict)
 
 
 def order_token_drugs(request, safe_id):
+    """
+    اقلام ارسالی
+    :param request: 
+    :param safe_id: 
+    :return: 
+    """
     if request.method == 'POST':
         search_text = request.POST.get('search_text')
         sort_by = int(request.POST.get('sorted_by', 0))
@@ -254,7 +265,9 @@ def order_token_drugs(request, safe_id):
             drug['exp_state'] = "lte6"
         else:
             drug['exp_state'] = "gt6"
-    context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
+    context_dict = {'drugs': list(all_drugs),
+                    'safe_id': request.user.hospital.safe_id,
+                    'pending_drugs_count': pending_drugs_count(request.user.hospital)}
     return render(request, 'madadsite/drugs_ordertaken.html', context_dict)
 
 
@@ -265,7 +278,9 @@ def all_hospitals(request):
         response_dict = {'hospitals': list(hospitals)}
         return JsonResponse(response_dict)
     hospitals = Hospital.objects.all().values('name', 'safe_id', 'address', 'phone')
-    context_dict = {'hospitals': list(hospitals), 'safe_id': request.user.hospital.safe_id}
+    context_dict = {'hospitals': list(hospitals),
+                    'safe_id': request.user.hospital.safe_id,
+                    'pending_drugs_count': pending_drugs_count(request.user.hospital)}
     return render(request, 'madadsite/hospitals.html', context_dict)
 
 
@@ -319,7 +334,9 @@ def all_drugs(request):
             all_drugs = sorted(all_drugs, key=itemgetter('create_date'), reverse=False)
         response_dict = {'drugs': list(all_drugs)}
         return JsonResponse(response_dict)
-    context_dict = {'drugs': list(all_drugs), 'safe_id': request.user.hospital.safe_id}
+    context_dict = {'drugs': list(all_drugs),
+                    'safe_id': request.user.hospital.safe_id,
+                    'pending_drugs_count': pending_drugs_count(request.user.hospital)}
     return render(request, 'madadsite/all_drugs.html', context_dict)
 
 

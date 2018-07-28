@@ -10,7 +10,9 @@
     <li><a href="{% url 'my_drugs' safe_id=safe_id %}">اقلام من</a></li>
     <li><a href="{% url 'all_drugs' %}">همه اقلام</a></li>
     <li><a href="{% url 'ordered_drugs' safe_id=safe_id %}">اقلام دریافتی</a></li>
-    <li class="active"><a href="{% url 'order_token_drugs' safe_id=safe_id %}">اقلام ارسالی</a></li>
+    <li class="active"><a href="{% url 'order_token_drugs' safe_id=safe_id %}">اقلام ارسالی</a>
+    {% if pending_drugs_count %}<span class="notification">{{ pending_drugs_count }}</span>{% endif %}
+    </li>
     <li><a href="{% url 'all_hospitals' %}">بیمارستان ها</a></li>
     {% if request.user.is_staff %}
       <li><a href="{% url 'exchange_drugs' %}">تبادلات دارو</a></li>

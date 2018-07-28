@@ -195,3 +195,16 @@ input::-webkit-inner-spin-button {
 .gt6{
     /*background-color: ;*/
 }
+.navbar-nav>li{
+    position: relative;
+}
+.navbar-nav>li .notification{
+    position: absolute;
+    background-color: red;
+    color: #ffffff;
+    padding: 0px 5px;
+    border-radius: 5px;
+    font-size: small;
+    left: 0;
+    bottom: -5px;
+}

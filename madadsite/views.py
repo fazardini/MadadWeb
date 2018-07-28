@@ -297,9 +297,16 @@ def change_order_state(request):
 def hospitals_drug(request):
     drug_id = request.POST.get('drug_id')
     drun_name = Drug.objects.filter(safe_id=drug_id).first().name
-    hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).exclude(current_count=0).values(
-        'hospital__name', 'expiration_date', 'current_count', 'safe_id')
-
+    hospitals = SurplusDrug.objects.filter(drug__safe_id=drug_id).exclude(
+        current_count=0).order_by('-created_at').values(
+        'hospital__name', 'expiration_date', 'current_count', 'safe_id', 'price')
+    for drug in hospitals:
+        if drug['expiration_date'] - the_today() <= timedelta(days=90):
+            drug['exp_state'] = "lte3"
+        elif drug['expiration_date'] - the_today() <= timedelta(days=180):
+            drug['exp_state'] = "lte6"
+        else:
+            drug['exp_state'] = "gt6"
     return JsonResponse({'hospitals': list(hospitals), 'drun_name': drun_name})
 
 

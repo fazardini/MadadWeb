@@ -83,7 +83,7 @@
                     {% elif item.state == 2 %}
                       تحویل داده شده
                     {% else %}
-                        لغو درخواست شده
+                        لغو درخواست
                     {% endif %}
                   </td>
                 </tr>
@@ -134,7 +134,7 @@
                   if(state==1)
                     thisTd.html('ارسال شده');
                   else if(state==3)
-                      thisTd.html('لغو درخواست شده');
+                      thisTd.html('لغو درخواست');
               }
               else{
                 alert("عملیات شکست مواجه شد");
@@ -184,7 +184,7 @@
                       state = 'تحویل داده شده';
                     }
                     else
-                        state = 'لغو درخواست شده'
+                        state = 'لغو درخواست'
                   $("#all_drugs").append('<tr class="'+drugs[i]['exp_state']+'" data-item-id="'+drugs[i]['safe_id']+'">' +
                       '<td>'+drugs[i]['surplus_drug__drug__name']+'</td>' +
                       '<td>'+drugs[i]['surplus_drug__expiration_date']+'</td>' +
@@ -229,7 +229,7 @@
                 if(state==1)
                     thisTd.html('ارسال شده');
                   else if(state==3)
-                      thisTd.html('لغو درخواست شده');
+                      thisTd.html('لغو درخواست');
               }
               else{
                 alert("عملیات شکست مواجه شد");

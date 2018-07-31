@@ -80,7 +80,7 @@
                     {% elif item.state == 0 %}
                       درحال بررسی
                     {% elif item.state == 3 %}
-                      لغو درخواست شده
+                      لغو درخواست
                     {% else %}
                       دریافت شده
                     {% endif %}
@@ -171,7 +171,7 @@
                       state = 'درحال بررسی';
                     }
                     else if (drugs[i]['state']==3)
-                        state = 'لغو درخواست شده';
+                        state = 'لغو درخواست';
                     else{
                       state = 'دریافت شده';
                     }

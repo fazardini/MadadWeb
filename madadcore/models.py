@@ -81,7 +81,7 @@ class OrderedDrug(models.Model):
         (PENDING, 'درحال بررسی'),
         (SENT, 'ارسال شده'),
         (DELIVERED, 'دریافت شده'),
-        (REJECT, 'لغو شده'),
+        (REJECT, 'لغو درخواست'),
     )
     MODE_DICT = dict((k, v) for k, v in MODE_CHOICES)
 

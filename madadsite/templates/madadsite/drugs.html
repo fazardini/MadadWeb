@@ -197,6 +197,14 @@
           var drugType = $("#drug_type").val();
           var drugCat = $("#cat").val();
           var drugPrice = $("#drug_price").val();
+          if (2018 > parseInt(drugYear) || 3000 < parseInt(drugYear)){
+              alert("سال وارد شده نادرست است");
+              return false;
+          }
+          if (0 > parseInt(drugMonth) || 12 < parseInt(drugMonth)){
+              alert("ماه وارد شده نادرست است");
+              return false;
+          }
           var catArray = {
               '1': 'دارو',
               '2': 'لوازم'

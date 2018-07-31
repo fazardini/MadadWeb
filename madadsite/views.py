@@ -540,3 +540,27 @@ def create_exchange_drugs_excel(request):
                 ws.write(row_num, col_num, result_list[col_num])
         wb.save(response)
         return response
+
+
+def change_password(request):
+    """
+    change password
+    :param request: 
+    :return: 
+    """
+    response_dict = {}
+    old_pass = request.POST.get('pass')
+    new_pass = request.POST.get('newPass')
+    username = request.user.username
+    user = authenticate(username=username, password=old_pass)
+    if user:
+        user.set_password(new_pass)
+        try:
+            user.save()
+            login(request, user)
+            response_dict['done'] = True
+        except user.ValueError:
+            response_dict['error'] = "عملیات ثبت رمز عبور جدید با مشکل مواجه شد."
+    else:
+        response_dict['error'] = "رمز عبور نادرست می باشد."
+    return JsonResponse(response_dict)

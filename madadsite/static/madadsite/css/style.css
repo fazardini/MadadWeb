@@ -19,11 +19,11 @@ body{
     direction: rtl;
 }
 header{
-    background: #5d1472; /* For browsers that do not support gradients */
-    background: -webkit-linear-gradient(left, #530cd3 , #5d1472); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(right, #530cd3, #5d1472); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(right, #530cd3, #5d1472); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(to right, #530cd3 , #5d1472); /* Standard syntax */
+    background: #e13c3c; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left, #e13c3c , #0f7e12); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(right, #e13c3c , #0f7e12); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(right, #e13c3c , #0f7e12); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to right, #e13c3c , #0f7e12); /* Standard syntax */
     width: 100%;
 }
 header div img{
@@ -207,4 +207,16 @@ input::-webkit-inner-spin-button {
     font-size: small;
     left: 0;
     bottom: -5px;
+}
+#show_pass_modal{
+    background-color: transparent;
+    color: #9d9d99;
+    padding-top: 12px;
+    outline: none;
+}
+#show_pass_modal:hover{
+    color: #FFFFFF;
+}
+.red-color{
+    color: red;
 }

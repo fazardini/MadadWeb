@@ -443,21 +443,29 @@ def create_all_drugs_excel(request):
         all_drugs = all_drugs.order_by('-current_count')
     elif sort_by == 2:
         all_drugs = all_drugs.order_by('current_count')
-    all_drugs = all_drugs.values('drug__name', 'current_count', 'expiration_date', 'hospital__name')
+    all_drugs = all_drugs.values('drug__name',
+                                 'current_count',
+                                 'expiration_date',
+                                 'hospital__name',
+                                 'cat', 'drug_type', 'price')
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="Drugs.xls"'
     wb = xlwt.Workbook(encoding='utf-8')
     ws = wb.add_sheet('همه اقلام')
 
     row_num = 0
-    columns = ['نام دارو', 'نام بیمارستان', 'تعداد مازاد', 'تاریخ انقضا']
+    columns = ['نام دارو', 'نام بیمارستان', 'تعداد مازاد', 'دسته', 'نوع', 'قیمت واحد', 'تاریخ انقضا']
     for col_num in range(len(columns)):
         ws.write(row_num, col_num, columns[col_num])
     for drug in all_drugs:
         row_num += 1
         expiration_date = '{}/{}/{}'.format(drug['expiration_date'].year, drug['expiration_date'].month, drug['expiration_date'].day)
         result_list = [drug['drug__name'], drug['hospital__name'],
-                       drug['current_count'], expiration_date]
+                       drug['current_count'],
+                       SurplusDrug.CAT_DICT[drug['cat']],
+                       SurplusDrug.TYPE_DICT[drug['drug_type']],
+                       drug['price'],
+                       expiration_date]
 
         for col_num in range(len(columns)):
             ws.write(row_num, col_num, result_list[col_num])
